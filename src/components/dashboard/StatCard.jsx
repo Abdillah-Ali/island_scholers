@@ -15,14 +15,14 @@ const StatCard = ({ title, value, icon, color = 'primary', subtitle = null }) =>
           bg: 'bg-secondary-50',
           iconBg: 'bg-secondary-100',
           iconColor: 'text-secondary-600',
-          borderColor: 'border-secondary-100'
+          borderColor: 'border-secondary-200'
         };
       case 'accent':
         return {
           bg: 'bg-accent-50',
           iconBg: 'bg-accent-100',
           iconColor: 'text-accent-600',
-          borderColor: 'border-accent-100'
+          borderColor: 'border-accent-200'
         };
       case 'success':
         return {

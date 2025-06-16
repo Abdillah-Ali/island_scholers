@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaGraduationCap, FaBuilding, FaUniversity, FaSearch, FaFileAlt, FaHandshake, FaCalendarAlt, FaTrophy, FaUsers, FaStar, FaChartLine } from 'react-icons/fa';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 
 const LandingPage = () => {
@@ -32,443 +31,392 @@ const LandingPage = () => {
       title: "Platform Ready",
       value: "Island Scholars",
       subtitle: "Connecting talent with opportunity",
-      icon: <FaStar className="fs-5" />,
-      color: "warning"
+      icon: <FaStar className="w-5 h-5" />,
+      color: "text-yellow-600"
     },
     {
       id: 2,
       title: "Growing Network",
       value: "Nationwide Coverage",
       subtitle: "Opportunities across Tanzania",
-      icon: <FaChartLine className="fs-5" />,
-      color: "success"
+      icon: <FaChartLine className="w-5 h-5" />,
+      color: "text-green-600"
     }
   ];
   
   return (
-    <div>
+    <div className="space-y-20">
       {/* Hero section */}
-      <section className="hero-section position-relative overflow-hidden">
-        <div className="position-absolute top-0 start-0 w-100 h-100" style={{ opacity: 0.05 }}>
-          <div className="position-absolute rounded-circle bg-white" style={{ top: '-96px', right: '-96px', width: '384px', height: '384px', filter: 'blur(60px)' }} />
-          <div className="position-absolute rounded-circle bg-white" style={{ bottom: '-96px', left: '-96px', width: '384px', height: '384px', filter: 'blur(60px)' }} />
-        </div>
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary-500 opacity-5 -z-10" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-200 rounded-full blur-3xl opacity-20 -z-10" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-accent-200 rounded-full blur-3xl opacity-20 -z-10" />
         
-        <Container className="py-5 position-relative" style={{ zIndex: 10 }}>
-          <Row className="align-items-center min-vh-75 py-5">
-            <Col lg={6} className="mb-5 mb-lg-0">
-              <motion.div
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="flex-1 max-w-2xl">
+              <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
+                className="text-4xl sm:text-5xl md:text-6xl font-bold text-primary-600 leading-tight mb-6"
               >
-                <h1 className="display-3 fw-bold text-white mb-4 lh-1">
-                  Connecting <span className="text-warning">Scholars</span> with <span className="text-info">Opportunities</span>
-                </h1>
-                
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="lead text-white-75 mb-4"
-                >
-                  A dedicated platform that connects Tanzanian college and university students with internship opportunities across Tanzania and Zanzibar. It helps students easily apply for their mandatory field internships required at the end of their academic programs.
-                </motion.p>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="d-flex flex-wrap gap-3"
-                >
-                  <Button as={Link} to={dashboardLink} size="lg" className="btn-warning px-4 py-3">
-                    {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
-                  </Button>
-                  <Button as={Link} to="#how-it-works" variant="outline-light" size="lg" className="px-4 py-3">
-                    Learn More
-                  </Button>
-                </motion.div>
-              </motion.div>
-            </Col>
-            
-            <Col lg={6}>
+                Connecting <span className="text-accent-500">Scholars</span> with <span className="text-secondary-500">Opportunities</span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-6 text-xl text-gray-600 max-w-2xl"
+              >
+                A dedicated platform that connects Tanzanian college and university students with internship opportunities across Tanzania and Zanzibar. It helps students easily apply for their mandatory field internships required at the end of their academic programs.
+              </motion.p>
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-10 flex flex-wrap gap-4"
               >
-                <img 
-                  src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260" 
-                  alt="Students collaborating" 
-                  className="img-fluid rounded-3 shadow-island-lg"
-                  style={{ maxHeight: '500px', objectFit: 'cover' }}
-                />
+                <Link to={dashboardLink} className="btn-primary px-8 py-3 text-lg">
+                  {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
+                </Link>
+                <Link to="#how-it-works" className="btn-outline px-8 py-3 text-lg">
+                  Learn More
+                </Link>
               </motion.div>
-            </Col>
-          </Row>
-        </Container>
+            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex-1 max-w-md"
+            >
+              <img 
+                src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260" 
+                alt="Students collaborating" 
+                className="w-full h-auto rounded-lg shadow-xl"
+              />
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* Platform Overview Section */}
-      <section className="bg-island-pattern py-5">
-        <Container className="py-5">
+      <section className="bg-gradient-to-br from-primary-50 to-secondary-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-5"
+            className="text-center mb-12"
           >
-            <h2 className="display-4 fw-bold text-gradient-primary mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary-600 mb-4">
               Ready to Transform Tanzania's Future
             </h2>
-            <p className="lead text-muted">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Join the platform that's connecting Tanzania's brightest minds with leading organizations across the nation
             </p>
           </motion.div>
 
-          <Row className="g-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Platform Status Card */}
-            <Col lg={6}>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Card className="h-100 border-0 shadow-island">
-                  <Card.Body className="p-4">
-                    <div className="d-flex align-items-center mb-4">
-                      <div className="feature-icon warning me-3" style={{ width: '48px', height: '48px', fontSize: '1.25rem' }}>
-                        <FaCalendarAlt />
-                      </div>
-                      <div>
-                        <h4 className="mb-1">Platform Status</h4>
-                        <p className="text-muted mb-0">Your gateway to opportunities</p>
-                      </div>
-                    </div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+            >
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center mr-4">
+                  <FaCalendarAlt className="w-6 h-6 text-accent-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800">Platform Status</h3>
+                  <p className="text-gray-600">Your gateway to opportunities</p>
+                </div>
+              </div>
 
-                    <div className="d-grid gap-3">
-                      <div className="p-3 bg-success bg-opacity-10 rounded-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <div className="bg-success rounded-circle me-3" style={{ width: '12px', height: '12px' }}></div>
-                            <span className="fw-medium">Platform Active</span>
-                          </div>
-                          <span className="text-success small">Ready for use</span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 bg-info bg-opacity-10 rounded-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <div className="bg-info rounded-circle me-3" style={{ width: '12px', height: '12px' }}></div>
-                            <span className="fw-medium">Registration Open</span>
-                          </div>
-                          <span className="text-info small">Join now</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-warning bg-opacity-10 rounded-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <div className="bg-warning rounded-circle me-3" style={{ width: '12px', height: '12px' }}></div>
-                            <span className="fw-medium">Features Available</span>
-                          </div>
-                          <span className="text-warning small">Full access</span>
-                        </div>
-                      </div>
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                      <span className="font-medium text-gray-800">Platform Active</span>
                     </div>
-
-                    <div className="text-center mt-4">
-                      <Link to="/register" className="text-decoration-none fw-medium">
-                        Get Started Today →
-                      </Link>
+                    <span className="text-green-600 text-sm">Ready for use</span>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                      <span className="font-medium text-gray-800">Registration Open</span>
                     </div>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
+                    <span className="text-blue-600 text-sm">Join now</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                      <span className="font-medium text-gray-800">Features Available</span>
+                    </div>
+                    <span className="text-purple-600 text-sm">Full access</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Link to="/register" className="text-accent-600 hover:text-accent-700 font-medium">
+                  Get Started Today →
+                </Link>
+              </div>
+            </motion.div>
 
             {/* Network Growth Card */}
-            <Col lg={6}>
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Card className="h-100 border-0 shadow-island">
-                  <Card.Body className="p-4">
-                    <div className="d-flex align-items-center mb-4">
-                      <div className="feature-icon secondary me-3" style={{ width: '48px', height: '48px', fontSize: '1.25rem' }}>
-                        <FaChartLine />
-                      </div>
-                      <div>
-                        <h4 className="mb-1">Growing Network</h4>
-                        <p className="text-muted mb-0">Expanding across Tanzania</p>
-                      </div>
-                    </div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+            >
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mr-4">
+                  <FaChartLine className="w-6 h-6 text-secondary-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800">Growing Network</h3>
+                  <p className="text-gray-600">Expanding across Tanzania</p>
+                </div>
+              </div>
 
-                    <div className="d-grid gap-3">
-                      {statistics.map((stat) => (
-                        <div key={stat.id} className="p-3 bg-light rounded-3">
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <div className="d-flex align-items-center">
-                              <div className={`bg-${stat.color} bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3`} style={{ width: '32px', height: '32px' }}>
-                                <span className={`text-${stat.color}`}>{stat.icon}</span>
-                              </div>
-                              <h6 className="mb-0">{stat.title}</h6>
-                            </div>
-                          </div>
-                          <div style={{ marginLeft: '44px' }}>
-                            <p className="fw-semibold mb-1">{stat.value}</p>
-                            <p className="text-muted small mb-0">{stat.subtitle}</p>
-                          </div>
+              <div className="space-y-4">
+                {statistics.map((stat) => (
+                  <div key={stat.id} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${stat.color} bg-opacity-10`}>
+                          <span className={stat.color}>{stat.icon}</span>
                         </div>
-                      ))}
-
-                      {/* Quick Stats */}
-                      <Row className="g-3 mt-2">
-                        <Col xs={6}>
-                          <div className="text-center p-3 bg-primary bg-opacity-10 rounded-3">
-                            <div className="h4 fw-bold text-primary mb-1">Ready</div>
-                            <div className="small text-muted">For Students</div>
-                          </div>
-                        </Col>
-                        <Col xs={6}>
-                          <div className="text-center p-3 bg-secondary bg-opacity-10 rounded-3">
-                            <div className="h4 fw-bold text-secondary mb-1">Open</div>
-                            <div className="small text-muted">For Organizations</div>
-                          </div>
-                        </Col>
-                      </Row>
+                        <h4 className="font-medium text-gray-800">{stat.title}</h4>
+                      </div>
                     </div>
-
-                    <div className="text-center mt-4">
-                      <Link to="/organizations" className="text-decoration-none fw-medium">
-                        Explore Platform →
-                      </Link>
+                    <div className="ml-11">
+                      <p className="font-semibold text-gray-900">{stat.value}</p>
+                      <p className="text-sm text-gray-600">{stat.subtitle}</p>
                     </div>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
-          </Row>
-        </Container>
+                  </div>
+                ))}
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="text-center p-3 bg-primary-50 rounded-lg">
+                    <div className="text-2xl font-bold text-primary-600">Ready</div>
+                    <div className="text-sm text-gray-600">For Students</div>
+                  </div>
+                  <div className="text-center p-3 bg-secondary-50 rounded-lg">
+                    <div className="text-2xl font-bold text-secondary-600">Open</div>
+                    <div className="text-sm text-gray-600">For Organizations</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Link to="/organizations" className="text-secondary-600 hover:text-secondary-700 font-medium">
+                  Explore Platform →
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </section>
       
       {/* For who section */}
-      <section className="py-5 bg-white">
-        <Container className="py-5">
-          <div className="text-center mb-5">
-            <h2 className="display-4 fw-bold text-gradient-primary mb-4">Who This Platform Is For</h2>
-            <p className="lead text-muted">
+      <section className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary-600">Who This Platform Is For</h2>
+            <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
               Our platform serves three key groups, creating a vibrant ecosystem for internship opportunities across Tanzania.
             </p>
           </div>
           
-          <Row className="g-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {/* For Students */}
-            <Col lg={4}>
-              <motion.div 
-                whileHover={{ y: -10 }}
-                className="h-100"
-              >
-                <Card className="feature-card text-center h-100">
-                  <Card.Body className="d-flex flex-column">
-                    <div className="feature-icon primary mx-auto mb-4">
-                      <FaGraduationCap />
-                    </div>
-                    <h4 className="mb-3">For Students</h4>
-                    <p className="text-muted mb-4">
-                      Discover internship opportunities with leading Tanzanian organizations, build your professional profile, and connect with industry leaders.
-                    </p>
-                    <ul className="list-unstyled text-start mb-4 flex-grow-1">
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-primary me-2">✓</span>
-                        <span>Create a professional profile</span>
-                      </li>
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-primary me-2">✓</span>
-                        <span>Apply for internships</span>
-                      </li>
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-primary me-2">✓</span>
-                        <span>Track application status</span>
-                      </li>
-                      <li className="d-flex align-items-start">
-                        <span className="text-primary me-2">✓</span>
-                        <span>Get personalized recommendations</span>
-                      </li>
-                    </ul>
-                    <Button as={Link} to="/register" variant="outline-primary" className="mt-auto">
-                      Sign Up as Student
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="card flex flex-col items-center text-center p-8 hover:border-primary-500 hover:border"
+            >
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-6">
+                <FaGraduationCap className="w-8 h-8 text-primary-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">For Students</h3>
+              <p className="text-gray-600 mb-6">
+                Discover internship opportunities with leading Tanzanian organizations, build your professional profile, and connect with industry leaders.
+              </p>
+              <ul className="text-left space-y-2 mb-8">
+                <li className="flex items-start">
+                  <span className="text-primary-500 mr-2">✓</span>
+                  <span>Create a professional profile</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-500 mr-2">✓</span>
+                  <span>Apply for internships</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-500 mr-2">✓</span>
+                  <span>Track application status</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-500 mr-2">✓</span>
+                  <span>Get personalized recommendations</span>
+                </li>
+              </ul>
+              <Link to="/register" className="btn-outline mt-auto">Sign Up as Student</Link>
+            </motion.div>
             
             {/* For Organizations */}
-            <Col lg={4}>
-              <motion.div 
-                whileHover={{ y: -10 }}
-                className="h-100"
-              >
-                <Card className="feature-card text-center h-100">
-                  <Card.Body className="d-flex flex-column">
-                    <div className="feature-icon secondary mx-auto mb-4">
-                      <FaBuilding />
-                    </div>
-                    <h4 className="mb-3">For Organizations</h4>
-                    <p className="text-muted mb-4">
-                      Find talented Tanzanian students for internships and build your talent pipeline with our comprehensive platform.
-                    </p>
-                    <ul className="list-unstyled text-start mb-4 flex-grow-1">
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-secondary me-2">✓</span>
-                        <span>Create organization profile</span>
-                      </li>
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-secondary me-2">✓</span>
-                        <span>Post internship opportunities</span>
-                      </li>
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-secondary me-2">✓</span>
-                        <span>Manage student applications</span>
-                      </li>
-                      <li className="d-flex align-items-start">
-                        <span className="text-secondary me-2">✓</span>
-                        <span>Access talent pool</span>
-                      </li>
-                    </ul>
-                    <Button as={Link} to="/register" variant="outline-secondary" className="mt-auto">
-                      Join as Organization
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="card flex flex-col items-center text-center p-8 hover:border-secondary-500 hover:border"
+            >
+              <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mb-6">
+                <FaBuilding className="w-8 h-8 text-secondary-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">For Organizations</h3>
+              <p className="text-gray-600 mb-6">
+                Find talented Tanzanian students for internships and build your talent pipeline with our comprehensive platform.
+              </p>
+              <ul className="text-left space-y-2 mb-8">
+                <li className="flex items-start">
+                  <span className="text-secondary-500 mr-2">✓</span>
+                  <span>Create organization profile</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-secondary-500 mr-2">✓</span>
+                  <span>Post internship opportunities</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-secondary-500 mr-2">✓</span>
+                  <span>Manage student applications</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-secondary-500 mr-2">✓</span>
+                  <span>Access talent pool</span>
+                </li>
+              </ul>
+              <Link to="/register" className="btn-outline mt-auto">Join as Organization</Link>
+            </motion.div>
 
             {/* For Universities */}
-            <Col lg={4}>
-              <motion.div 
-                whileHover={{ y: -10 }}
-                className="h-100"
-              >
-                <Card className="feature-card text-center h-100">
-                  <Card.Body className="d-flex flex-column">
-                    <div className="feature-icon warning mx-auto mb-4">
-                      <FaUniversity />
-                    </div>
-                    <h4 className="mb-3">For Universities</h4>
-                    <p className="text-muted mb-4">
-                      Connect your students with quality internship opportunities and manage the internship confirmation process seamlessly.
-                    </p>
-                    <ul className="list-unstyled text-start mb-4 flex-grow-1">
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-warning me-2">✓</span>
-                        <span>Manage student applications</span>
-                      </li>
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-warning me-2">✓</span>
-                        <span>Confirm internship placements</span>
-                      </li>
-                      <li className="d-flex align-items-start mb-2">
-                        <span className="text-warning me-2">✓</span>
-                        <span>Assign academic supervisors</span>
-                      </li>
-                      <li className="d-flex align-items-start">
-                        <span className="text-warning me-2">✓</span>
-                        <span>Generate official letters</span>
-                      </li>
-                    </ul>
-                    <Button as={Link} to="/register" variant="outline-warning" className="mt-auto">
-                      Register University
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
-          </Row>
-        </Container>
+            <motion.div 
+              whileHover={{ y: -10 }}
+              className="card flex flex-col items-center text-center p-8 hover:border-accent-500 hover:border"
+            >
+              <div className="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mb-6">
+                <FaUniversity className="w-8 h-8 text-accent-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">For Universities</h3>
+              <p className="text-gray-600 mb-6">
+                Connect your students with quality internship opportunities and manage the internship confirmation process seamlessly.
+              </p>
+              <ul className="text-left space-y-2 mb-8">
+                <li className="flex items-start">
+                  <span className="text-accent-500 mr-2">✓</span>
+                  <span>Manage student applications</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-accent-500 mr-2">✓</span>
+                  <span>Confirm internship placements</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-accent-500 mr-2">✓</span>
+                  <span>Assign academic supervisors</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-accent-500 mr-2">✓</span>
+                  <span>Generate official letters</span>
+                </li>
+              </ul>
+              <Link to="/register" className="btn-outline mt-auto">Register University</Link>
+            </motion.div>
+          </div>
+        </div>
       </section>
       
       {/* How it works section */}
-      <section id="how-it-works" className="py-5 bg-light">
-        <Container className="py-5">
-          <div className="text-center mb-5">
-            <h2 className="display-4 fw-bold text-gradient-primary mb-4">How It Works</h2>
-            <p className="lead text-muted">
+      <section id="how-it-works" className="bg-neutral-50 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary-600">How It Works</h2>
+            <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
               Our platform makes it easy to explore opportunities, connect with the right people, and launch your career in Tanzania.
             </p>
           </div>
           
-          <Row className="g-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 */}
-            <Col lg={4}>
-              <div className="text-center">
-                <div className="position-relative mb-4">
-                  <div className="feature-icon primary mx-auto">
-                    <FaSearch />
-                  </div>
-                  <div className="position-absolute top-50 start-100 w-100 d-none d-lg-block" style={{ height: '2px', background: 'var(--bs-primary)', opacity: 0.2 }}></div>
+            <div className="flex flex-col items-center text-center">
+              <div className="relative">
+                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-6">
+                  <FaSearch className="w-8 h-8 text-primary-600" />
                 </div>
-                <h4 className="mb-3">Explore</h4>
-                <p className="text-muted">
-                  Browse available internships and organizations across Tanzania and Zanzibar. Discover opportunities aligned with your career goals.
-                </p>
+                <div className="absolute top-8 left-full w-full h-0.5 bg-primary-200 hidden md:block"></div>
               </div>
-            </Col>
+              <h3 className="text-xl font-semibold mb-4">Explore</h3>
+              <p className="text-gray-600">
+                Browse available internships and organizations across Tanzania and Zanzibar. Discover opportunities aligned with your career goals.
+              </p>
+            </div>
             
             {/* Step 2 */}
-            <Col lg={4}>
-              <div className="text-center">
-                <div className="position-relative mb-4">
-                  <div className="feature-icon secondary mx-auto">
-                    <FaFileAlt />
-                  </div>
-                  <div className="position-absolute top-50 start-100 w-100 d-none d-lg-block" style={{ height: '2px', background: 'var(--bs-secondary)', opacity: 0.2 }}></div>
+            <div className="flex flex-col items-center text-center">
+              <div className="relative">
+                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-6">
+                  <FaFileAlt className="w-8 h-8 text-primary-600" />
                 </div>
-                <h4 className="mb-3">Apply</h4>
-                <p className="text-muted">
-                  Submit your application with all required documents. Organizations can review and reach out to candidates directly.
-                </p>
+                <div className="absolute top-8 left-full w-full h-0.5 bg-primary-200 hidden md:block"></div>
               </div>
-            </Col>
+              <h3 className="text-xl font-semibold mb-4">Apply</h3>
+              <p className="text-gray-600">
+                Submit your application with all required documents. Organizations can review and reach out to candidates directly.
+              </p>
+            </div>
             
             {/* Step 3 */}
-            <Col lg={4}>
-              <div className="text-center">
-                <div className="feature-icon warning mx-auto mb-4">
-                  <FaHandshake />
-                </div>
-                <h4 className="mb-3">Connect</h4>
-                <p className="text-muted">
-                  Build relationships with organizations. Receive official documentation and manage your internship journey.
-                </p>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-6">
+                <FaHandshake className="w-8 h-8 text-primary-600" />
               </div>
-            </Col>
-          </Row>
-        </Container>
+              <h3 className="text-xl font-semibold mb-4">Connect</h3>
+              <p className="text-gray-600">
+                Build relationships with organizations. Receive official documentation and manage your internship journey.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
       
       {/* CTA section */}
-      <section className="bg-gradient-primary text-white py-5">
-        <Container className="py-5">
-          <Row className="align-items-center">
-            <Col lg={8}>
-              <h2 className="display-4 fw-bold text-warning mb-3">Ready to get started?</h2>
-              <p className="lead mb-0">
+      <section className="bg-primary-600 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-green-400">Ready to get started?</h2>
+              <p className="mt-4 text-xl text-white text-opacity-90 max-w-2xl">
                 Join our platform today and take the first step toward your next great opportunity in Tanzania.
               </p>
-            </Col>
-            <Col lg={4} className="text-lg-end">
-              <Button as={Link} to="/register" size="lg" className="btn-warning px-4 py-3">
+            </div>
+            <div className="flex-shrink-0">
+              <Link to="/register" className="btn-accent px-8 py-3 text-lg">
                 Sign Up Now
-              </Button>
-            </Col>
-          </Row>
-        </Container>
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );

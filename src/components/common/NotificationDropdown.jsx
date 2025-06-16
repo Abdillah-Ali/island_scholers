@@ -24,16 +24,16 @@ const NotificationDropdown = ({ onClose }) => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'application':
-        return <FaFileAlt className="w-5 h-5 text-primary-500" />;
+        return <FaFileAlt className="h-5 w-5 text-primary-500" />;
       case 'message':
-        return <FaEnvelope className="w-5 h-5 text-accent-500" />;
+        return <FaEnvelope className="h-5 w-5 text-accent-500" />;
       case 'alert':
-        return <FaExclamationCircle className="w-5 h-5 text-yellow-500" />;
+        return <FaExclamationCircle className="h-5 w-5 text-warning" />;
       case 'success':
-        return <FaCheckCircle className="w-5 h-5 text-green-600" />;
+        return <FaCheckCircle className="h-5 w-5 text-success" />;
       case 'recommendation':
       default:
-        return <FaBell className="w-5 h-5 text-secondary-500" />;
+        return <FaBell className="h-5 w-5 text-secondary-500" />;
     }
   };
 
@@ -55,7 +55,7 @@ const NotificationDropdown = ({ onClose }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.2 }}
-      className="absolute right-0 mt-2 w-80 bg-white rounded shadow-lg py-1 z-50 max-h-96 overflow-y-auto border border-gray-200"
+      className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50 max-h-96 overflow-y-auto border border-gray-200"
     >
       <div className="px-4 py-2 border-b border-gray-200">
         <div className="flex justify-between items-center">

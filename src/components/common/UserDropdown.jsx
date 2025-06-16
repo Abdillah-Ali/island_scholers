@@ -58,7 +58,7 @@ const UserDropdown = ({ user, onLogout, onClose }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.2 }}
-      className="absolute right-0 mt-2 w-56 bg-white rounded shadow-lg py-1 z-50 border border-gray-200"
+      className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
     >
       <div className="px-4 py-3 border-b border-gray-200">
         <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
@@ -76,7 +76,7 @@ const UserDropdown = ({ user, onLogout, onClose }) => {
             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             onClick={onClose}
           >
-            <FaUser className="mr-3 w-4 h-4 text-gray-500" />
+            <FaUser className="mr-3 h-4 w-4 text-gray-500" />
             <span>Your Profile</span>
           </Link>
         )}
@@ -85,7 +85,7 @@ const UserDropdown = ({ user, onLogout, onClose }) => {
           className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           onClick={onClose}
         >
-          <FaCog className="mr-3 w-4 h-4 text-gray-500" />
+          <FaCog className="mr-3 h-4 w-4 text-gray-500" />
           <span>{user.role === 'admin' ? 'Admin Dashboard' : 'Dashboard'}</span>
         </Link>
         {user.role === 'admin' && (
@@ -94,7 +94,7 @@ const UserDropdown = ({ user, onLogout, onClose }) => {
             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             onClick={onClose}
           >
-            <FaUserShield className="mr-3 w-4 h-4 text-gray-500" />
+            <FaUserShield className="mr-3 h-4 w-4 text-gray-500" />
             <span>Admin Settings</span>
           </Link>
         )}
@@ -105,7 +105,7 @@ const UserDropdown = ({ user, onLogout, onClose }) => {
           onClick={onLogout}
           className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         >
-          <FaSignOutAlt className="mr-3 w-4 h-4 text-gray-500" />
+          <FaSignOutAlt className="mr-3 h-4 w-4 text-gray-500" />
           <span>Sign Out</span>
         </button>
       </div>

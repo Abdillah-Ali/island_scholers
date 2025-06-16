@@ -14,14 +14,14 @@ const Notification = ({ type = 'success', message, onClose }) => {
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <FaCheckCircle className="w-5 h-5 text-green-600" />;
+        return <FaCheckCircle className="h-5 w-5 text-green-500" />;
       case 'error':
-        return <FaExclamationTriangle className="w-5 h-5 text-red-500" />;
+        return <FaExclamationTriangle className="h-5 w-5 text-red-500" />;
       case 'warning':
-        return <FaExclamationTriangle className="w-5 h-5 text-yellow-500" />;
+        return <FaExclamationTriangle className="h-5 w-5 text-yellow-500" />;
       case 'info':
       default:
-        return <FaInfoCircle className="w-5 h-5 text-blue-600" />;
+        return <FaInfoCircle className="h-5 w-5 text-blue-500" />;
     }
   };
 
@@ -58,7 +58,7 @@ const Notification = ({ type = 'success', message, onClose }) => {
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -50 }}
-      className={`fixed top-4 right-4 left-4 md:left-auto md:w-96 z-50 ${getBgColor()} border-l-4 ${getBorderColor()} p-4 rounded shadow`}
+      className={`fixed top-4 right-4 left-4 md:left-auto md:w-96 z-50 ${getBgColor()} border-l-4 ${getBorderColor()} p-4 rounded-md shadow-md`}
     >
       <div className="flex items-start">
         <div className="flex-shrink-0">{getIcon()}</div>
@@ -66,10 +66,10 @@ const Notification = ({ type = 'success', message, onClose }) => {
           <p className="text-sm font-medium text-gray-800">{message}</p>
         </div>
         <button
-          className="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-600 focus:outline-none"
+          className="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-500 focus:outline-none"
           onClick={onClose}
         >
-          <FaTimes className="w-5 h-5" />
+          <FaTimes className="h-5 w-5" />
         </button>
       </div>
     </motion.div>

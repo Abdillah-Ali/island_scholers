@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaLinkedin, FaGithub, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
-import { Container, Row, Col } from 'react-bootstrap';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -44,7 +43,7 @@ const Footer = () => {
   const linkVariants = {
     hover: {
       x: 5,
-      color: "#00b894",
+      color: "#FF6B6B",
       transition: {
         duration: 0.2,
         ease: "easeInOut"
@@ -53,18 +52,11 @@ const Footer = () => {
   };
 
   return (
-    <footer className="footer position-relative overflow-hidden">
+    <footer className="bg-gradient-to-br from-primary-700 via-primary-600 to-primary-800 text-white relative overflow-hidden">
       {/* Animated Background Elements */}
-      <div className="position-absolute top-0 start-0 w-100 h-100" style={{ opacity: 0.1 }}>
+      <div className="absolute inset-0 opacity-10">
         <motion.div 
-          className="position-absolute rounded-circle"
-          style={{ 
-            top: '40px', 
-            left: '40px', 
-            width: '128px', 
-            height: '128px', 
-            background: 'var(--island-coral)' 
-          }}
+          className="absolute top-10 left-10 w-32 h-32 bg-accent-400 rounded-full"
           animate={{
             scale: [1, 1.2, 1],
             rotate: [0, 180, 360],
@@ -76,14 +68,7 @@ const Footer = () => {
           }}
         />
         <motion.div 
-          className="position-absolute rounded-circle"
-          style={{ 
-            top: '80px', 
-            right: '80px', 
-            width: '96px', 
-            height: '96px', 
-            background: 'var(--island-teal)' 
-          }}
+          className="absolute top-20 right-20 w-24 h-24 bg-secondary-400 rounded-full"
           animate={{
             scale: [1.2, 1, 1.2],
             rotate: [360, 180, 0],
@@ -95,14 +80,7 @@ const Footer = () => {
           }}
         />
         <motion.div 
-          className="position-absolute rounded-circle"
-          style={{ 
-            bottom: '40px', 
-            left: '33%', 
-            width: '80px', 
-            height: '80px', 
-            background: 'var(--island-coral)' 
-          }}
+          className="absolute bottom-10 left-1/3 w-20 h-20 bg-accent-300 rounded-full"
           animate={{
             y: [-10, 10, -10],
             x: [-5, 5, -5],
@@ -115,11 +93,10 @@ const Footer = () => {
         />
       </div>
 
-      {/* Wave Effect */}
-      <div className="position-absolute top-0 start-0 w-100 overflow-hidden">
+      {/* Animated Wave */}
+      <div className="absolute top-0 left-0 w-full overflow-hidden">
         <motion.svg
-          className="position-relative d-block w-100"
-          style={{ height: '48px' }}
+          className="relative block w-full h-12"
           viewBox="0 0 1200 120"
           preserveAspectRatio="none"
           initial={{ pathLength: 0 }}
@@ -145,194 +122,179 @@ const Footer = () => {
         </motion.svg>
       </div>
         
-      <Container className="py-5 position-relative" style={{ zIndex: 10 }}>
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <Row className="g-4">
-            {/* Company info */}
-            <Col md={3}>
-              <motion.div variants={itemVariants}>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <Link to="/" className="text-decoration-none">
-                    <h4 className="text-white fw-bold mb-3">Island Scholars</h4>
-                  </Link>
-                </motion.div>
-                
-                {/* Contact Info */}
-                <motion.div className="mb-4" variants={itemVariants}>
-                  <motion.div 
-                    className="d-flex align-items-center text-white-50 mb-2 small"
-                    whileHover={{ x: 5, color: 'white' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <FaMapMarkerAlt className="me-2 text-info" />
-                    <span>Tunguu Zanzibar</span>
-                  </motion.div>
-                  <motion.div 
-                    className="d-flex align-items-center text-white-50 mb-2 small"
-                    whileHover={{ x: 5, color: 'white' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <FaPhone className="me-2 text-info" />
-                    <span>+255 788 008 750</span>
-                  </motion.div>
-                  <motion.div 
-                    className="d-flex align-items-center text-white-50 small"
-                    whileHover={{ x: 5, color: 'white' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <FaEnvelope className="me-2 text-info" />
-                    <span>abdillah.va@gmail.com</span>
-                  </motion.div>
-                </motion.div>
-                
-                {/* Social links */}
-                <motion.div className="d-flex gap-3" variants={itemVariants}>
-                  {[
-                    { icon: FaLinkedin, href: "#", color: "text-primary" },
-                    { icon: FaGithub, href: "#", color: "text-light" }
-                  ].map((social, index) => (
-                    <motion.a
-                      key={index}
-                      href={social.href}
-                      className={`text-white-50 ${social.color} fs-5`}
-                      variants={socialIconVariants}
-                      whileHover="hover"
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <social.icon />
-                    </motion.a>
-                  ))}
-                </motion.div>
-              </motion.div>
-            </Col>
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Company info */}
+          <motion.div className="md:col-span-1" variants={itemVariants}>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Link to="/" className="text-2xl font-bold text-white hover:text-accent-300 transition-colors duration-300">
+                Island Scholars
+              </Link>
+            </motion.div>
             
-            {/* Navigation links */}
-            <Col md={3}>
-              <motion.div variants={itemVariants}>
-                <motion.h5 
-                  className="text-white fw-semibold mb-3"
-                  whileHover={{ color: "#00b894" }}
-                  transition={{ duration: 0.3 }}
-                >
-                  For Students
-                </motion.h5>
-                <ul className="list-unstyled">
-                  {[
-                    { to: "/internships", text: "Find Internships" },
-                    { to: "/organizations", text: "Explore Organizations" },
-                    { to: "/register", text: "Create an Account" },
-                    { to: "#", text: "Resources" }
-                  ].map((link, index) => (
-                    <motion.li key={index} className="mb-2" variants={linkVariants} whileHover="hover">
-                      <Link 
-                        to={link.to} 
-                        className="text-white-50 text-decoration-none small"
-                      >
-                        {link.text}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            </Col>
-            
-            <Col md={3}>
-              <motion.div variants={itemVariants}>
-                <motion.h5 
-                  className="text-white fw-semibold mb-3"
-                  whileHover={{ color: "#00b894" }}
-                  transition={{ duration: 0.3 }}
-                >
-                  For Organizations
-                </motion.h5>
-                <ul className="list-unstyled">
-                  {[
-                    { to: "/register", text: "Join the Platform" },
-                    { to: "#", text: "Post Opportunities" },
-                    { to: "/organizations", text: "Partner Network" },
-                    { to: "#", text: "Success Stories" }
-                  ].map((link, index) => (
-                    <motion.li key={index} className="mb-2" variants={linkVariants} whileHover="hover">
-                      <Link 
-                        to={link.to} 
-                        className="text-white-50 text-decoration-none small"
-                      >
-                        {link.text}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            </Col>
-            
-            <Col md={3}>
-              <motion.div variants={itemVariants}>
-                <motion.h5 
-                  className="text-white fw-semibold mb-3"
-                  whileHover={{ color: "#00b894" }}
-                  transition={{ duration: 0.3 }}
-                >
-                  Company
-                </motion.h5>
-                <ul className="list-unstyled">
-                  {[
-                    { to: "#", text: "About Us" },
-                    { to: "#", text: "Contact" },
-                    { to: "#", text: "Privacy Policy" },
-                    { to: "#", text: "Terms of Service" }
-                  ].map((link, index) => (
-                    <motion.li key={index} className="mb-2" variants={linkVariants} whileHover="hover">
-                      <Link 
-                        to={link.to} 
-                        className="text-white-50 text-decoration-none small"
-                      >
-                        {link.text}
-                      </Link>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            </Col>
-          </Row>
-          
-          {/* Bottom section */}
-          <motion.div 
-            className="mt-5 pt-4 border-top border-secondary border-opacity-25"
-            variants={itemVariants}
-          >
-            <div className="text-center">
-              <motion.p 
-                className="text-white-50 small mb-0"
-                whileHover={{ color: 'white' }}
-                transition={{ duration: 0.3 }}
+            {/* Contact Info */}
+            <motion.div className="mt-4 space-y-2" variants={itemVariants}>
+              <motion.div 
+                className="flex items-center text-white opacity-80 hover:opacity-100 transition-opacity duration-300"
+                whileHover={{ x: 5 }}
               >
-                &copy; {currentYear} Island Scholars. All rights reserved. Made By Abdillah Ali
-              </motion.p>
-            </div>
+                <FaMapMarkerAlt className="mr-2 text-accent-300" />
+                <span className="text-sm">Tunguu Zanzibar</span>
+              </motion.div>
+              <motion.div 
+                className="flex items-center text-white opacity-80 hover:opacity-100 transition-opacity duration-300"
+                whileHover={{ x: 5 }}
+              >
+                <FaPhone className="mr-2 text-accent-300" />
+                <span className="text-sm">+255 788 008 750</span>
+              </motion.div>
+              <motion.div 
+                className="flex items-center text-white opacity-80 hover:opacity-100 transition-opacity duration-300"
+                whileHover={{ x: 5 }}
+              >
+                <FaEnvelope className="mr-2 text-accent-300" />
+                <span className="text-sm">abdillah.va@gmail.com</span>
+              </motion.div>
+            </motion.div>
+            
+            {/* Social links */}
+            <motion.div className="mt-6 flex space-x-4" variants={itemVariants}>
+              {[
+                { icon: FaLinkedin, href: "#", color: "hover:text-blue-400" },
+                { icon: FaGithub, href: "#", color: "hover:text-gray-300" }
+              ].map((social, index) => (
+                <motion.a
+                  key={index}
+                  href={social.href}
+                  className={`text-white opacity-80 ${social.color} transition-all duration-300`}
+                  variants={socialIconVariants}
+                  whileHover="hover"
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <social.icon className="h-6 w-6" />
+                </motion.a>
+              ))}
+            </motion.div>
           </motion.div>
+          
+          {/* Navigation links */}
+          <motion.div variants={itemVariants}>
+            <motion.h3 
+              className="text-lg font-semibold mb-4 text-white"
+              whileHover={{ color: "#FF6B6B" }}
+              transition={{ duration: 0.3 }}
+            >
+              For Students
+            </motion.h3>
+            <ul className="space-y-3">
+              {[
+                { to: "/internships", text: "Find Internships" },
+                { to: "/organizations", text: "Explore Organizations" },
+                { to: "/register", text: "Create an Account" },
+                { to: "#", text: "Resources" }
+              ].map((link, index) => (
+                <motion.li key={index} variants={linkVariants} whileHover="hover">
+                  <Link 
+                    to={link.to} 
+                    className="text-white opacity-80 hover:opacity-100 text-sm transition-all duration-300 block"
+                  >
+                    {link.text}
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <motion.h3 
+              className="text-lg font-semibold mb-4 text-white"
+              whileHover={{ color: "#FF6B6B" }}
+              transition={{ duration: 0.3 }}
+            >
+              For Organizations
+            </motion.h3>
+            <ul className="space-y-3">
+              {[
+                { to: "/register", text: "Join the Platform" },
+                { to: "#", text: "Post Opportunities" },
+                { to: "/organizations", text: "Partner Network" },
+                { to: "#", text: "Success Stories" }
+              ].map((link, index) => (
+                <motion.li key={index} variants={linkVariants} whileHover="hover">
+                  <Link 
+                    to={link.to} 
+                    className="text-white opacity-80 hover:opacity-100 text-sm transition-all duration-300 block"
+                  >
+                    {link.text}
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <motion.h3 
+              className="text-lg font-semibold mb-4 text-white"
+              whileHover={{ color: "#FF6B6B" }}
+              transition={{ duration: 0.3 }}
+            >
+              Company
+            </motion.h3>
+            <ul className="space-y-3">
+              {[
+                { to: "#", text: "About Us" },
+                { to: "#", text: "Contact" },
+                { to: "#", text: "Privacy Policy" },
+                { to: "#", text: "Terms of Service" }
+              ].map((link, index) => (
+                <motion.li key={index} variants={linkVariants} whileHover="hover">
+                  <Link 
+                    to={link.to} 
+                    className="text-white opacity-80 hover:opacity-100 text-sm transition-all duration-300 block"
+                  >
+                    {link.text}
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+        </div>
+        
+        {/* Bottom section */}
+        <motion.div 
+          className="mt-12 pt-8 border-t border-white border-opacity-20"
+          variants={itemVariants}
+        >
+          <div className="text-center">
+            <motion.p 
+              className="text-sm text-white opacity-80"
+              whileHover={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              &copy; {currentYear} Island Scholars. All rights reserved. Made By Abdillah Ali
+            </motion.p>
+          </div>
         </motion.div>
-      </Container>
+      </motion.div>
 
       {/* Floating particles animation */}
-      <div className="position-absolute top-0 start-0 w-100 h-100" style={{ pointerEvents: 'none' }}>
+      <div className="absolute inset-0 pointer-events-none">
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            className="position-absolute rounded-circle bg-white"
+            className="absolute w-2 h-2 bg-white rounded-full opacity-20"
             style={{
-              width: '8px',
-              height: '8px',
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              opacity: 0.2
             }}
             animate={{
               y: [-20, -100, -20],
