@@ -1,0 +1,32 @@
+<svg width="32" height="32" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ocean Background -->
+  <circle cx="70" cy="70" r="65" fill="#6EE7B7" opacity="0.2"/>
+  
+  <!-- Island Base -->
+  <ellipse cx="70" cy="95" rx="50" ry="22" fill="#22C55E"/>
+  
+  <!-- Island Hills -->
+  <path d="M25 95 Q40 75 55 80 Q70 70 85 80 Q100 75 115 95" fill="#10B981"/>
+  <path d="M35 95 Q50 82 65 85 Q80 78 95 95" fill="#059669" opacity="0.7"/>
+  
+  <!-- Palm Trees -->
+  <line x1="45" y1="85" x2="45" y2="60" stroke="#8B4513" stroke-width="4"/>
+  <path d="M45 60 Q35 50 28 55 Q45 45 55 55 Q45 40 45 60" fill="#10B981"/>
+  
+  <line x1="95" y1="85" x2="95" y2="65" stroke="#8B4513" stroke-width="3.5"/>
+  <path d="M95 65 Q88 58 82 62 Q95 55 102 62 Q95 50 95 65" fill="#10B981"/>
+  
+  <!-- Graduation Cap -->
+  <rect x="50" y="32" width="40" height="12" rx="4" fill="#047857"/>
+  <path d="M35 32 L105 32 L98 18 L42 18 Z" fill="#047857"/>
+  <circle cx="70" cy="25" r="3" fill="#F59E0B"/>
+  
+  <!-- Tassel -->
+  <line x1="98" y1="18" x2="108" y2="8" stroke="#F59E0B" stroke-width="3"/>
+  <circle cx="108" cy="8" r="4" fill="#F59E0B"/>
+  <path d="M108 8 L112 16 L104 16 Z" fill="#F59E0B"/>
+  
+  <!-- Waves -->
+  <path d="M10 100 Q25 95 40 100 Q55 105 70 100 Q85 95 100 100 Q115 105 130 100" stroke="#A7F3D0" stroke-width="3" fill="none"/>
+  <path d="M15 110 Q30 105 45 110 Q60 115 75 110 Q90 105 105 110 Q120 115 135 110" stroke="#A7F3D0" stroke-width="2" fill="none" opacity="0.8"/>
+</svg>
