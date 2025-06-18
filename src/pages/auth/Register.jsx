@@ -189,20 +189,26 @@ const Register = () => {
       
       const user = await register(userData);
       
-      // Redirect based on user role
-      switch (user.role) {
-        case 'student':
-          navigate('/student/dashboard');
-          break;
-        case 'organization':
-          navigate('/organization/dashboard');
-          break;
-        case 'university':
-          navigate('/university/dashboard');
-          break;
-        default:
-          navigate('/');
-      }
+      // Show success message briefly before redirecting
+      setError('');
+      
+      // Redirect based on user role after a short delay
+      setTimeout(() => {
+        switch (user.role) {
+          case 'student':
+            navigate('/student/dashboard');
+            break;
+          case 'organization':
+            navigate('/organization/dashboard');
+            break;
+          case 'university':
+            navigate('/university/dashboard');
+            break;
+          default:
+            navigate('/');
+        }
+      }, 500);
+      
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -362,6 +368,17 @@ const Register = () => {
               >
                 <FaExclamationCircle className="mr-3" />
                 <span>{error}</span>
+              </motion.div>
+            )}
+
+            {loading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 flex items-center rounded-md"
+              >
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500 mr-3"></div>
+                <span>Creating your account...</span>
               </motion.div>
             )}
 

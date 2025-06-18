@@ -60,15 +60,65 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // Register function - now expects real authentication
+  // Register function - now creates users successfully
   const register = (userData) => {
     return new Promise((resolve, reject) => {
       // Simulate API call delay
       setTimeout(() => {
-        // In a real app, this would make an API call to your Django backend
-        // For now, we'll reject with a message to set up real authentication
-        reject(new Error('Please set up registration with your backend API'));
-      }, 800);
+        try {
+          // Create a new user object
+          const newUser = {
+            id: `user-${Date.now()}`,
+            name: userData.role === 'organization' ? userData.companyName : userData.name,
+            email: userData.email,
+            role: userData.role,
+            profileImage: null,
+            createdAt: new Date().toISOString(),
+            // Add role-specific data
+            ...(userData.role === 'student' && {
+              university: userData.university,
+              studentId: userData.studentId,
+              fieldOfStudy: userData.fieldOfStudy,
+              yearOfStudy: userData.yearOfStudy,
+              phone: userData.phone,
+              skills: [],
+              documents: {}
+            }),
+            ...(userData.role === 'organization' && {
+              companyName: userData.companyName,
+              industry: userData.industry,
+              companySize: userData.companySize,
+              description: userData.description,
+              website: userData.website,
+              foundedYear: userData.foundedYear,
+              registrationNumber: userData.registrationNumber,
+              location: userData.location,
+              contactPerson: userData.contactPerson,
+              contactPhone: userData.contactPhone,
+              desiredSkills: []
+            }),
+            ...(userData.role === 'university' && {
+              universityName: userData.name,
+              description: userData.description,
+              website: userData.website,
+              establishedYear: userData.establishedYear,
+              studentCount: userData.studentCount,
+              facultyCount: userData.facultyCount,
+              location: userData.location,
+              programs: userData.programs || []
+            })
+          };
+
+          // Save user to localStorage and set as current user
+          setCurrentUser(newUser);
+          localStorage.setItem('islandScholarsUser', JSON.stringify(newUser));
+          
+          // Resolve with the new user
+          resolve(newUser);
+        } catch (error) {
+          reject(new Error('Registration failed. Please try again.'));
+        }
+      }, 1000);
     });
   };
 
