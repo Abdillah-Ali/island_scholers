@@ -1,5 +1,3 @@
-package com.islandscholars.context;
-
 import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
