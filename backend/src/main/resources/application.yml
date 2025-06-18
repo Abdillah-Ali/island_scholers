@@ -48,3 +48,5 @@ logging:
   level:
     com.islandscholars: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    root: INFO

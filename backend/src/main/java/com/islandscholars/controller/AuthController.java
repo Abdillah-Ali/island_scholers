@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
@@ -35,8 +35,15 @@ public class AuthController {
             String message = authService.registerUser(signUpRequest);
             return ResponseEntity.ok(new MessageResponse(message));
         } catch (Exception e) {
+            e.printStackTrace(); // Add logging for debugging
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
+    }
+
+    // Add a test endpoint to verify the API is working
+    @GetMapping("/test")
+    public ResponseEntity<?> testEndpoint() {
+        return ResponseEntity.ok(new MessageResponse("API is working!"));
     }
 }

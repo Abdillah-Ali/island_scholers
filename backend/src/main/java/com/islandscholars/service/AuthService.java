@@ -65,6 +65,23 @@ public class AuthService {
 
     @Transactional
     public String registerUser(SignupRequest signUpRequest) {
+        // Validate required fields
+        if (signUpRequest.getUsername() == null || signUpRequest.getUsername().trim().isEmpty()) {
+            throw new RuntimeException("Username is required!");
+        }
+        
+        if (signUpRequest.getEmail() == null || signUpRequest.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("Email is required!");
+        }
+        
+        if (signUpRequest.getPassword() == null || signUpRequest.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Password is required!");
+        }
+        
+        if (signUpRequest.getRole() == null) {
+            throw new RuntimeException("Role is required!");
+        }
+
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             throw new RuntimeException("Error: Username is already taken!");
         }
@@ -112,7 +129,7 @@ public class AuthService {
         studentProfile.setSkills(signUpRequest.getSkills());
 
         // Find university by name and associate it
-        if (signUpRequest.getUniversity() != null) {
+        if (signUpRequest.getUniversity() != null && !signUpRequest.getUniversity().trim().isEmpty()) {
             University university = universityRepository.findByName(signUpRequest.getUniversity())
                     .orElse(null);
             studentProfile.setUniversity(university);
@@ -126,8 +143,12 @@ public class AuthService {
         orgProfile.setUser(user);
         orgProfile.setCompanyName(signUpRequest.getCompanyName());
         
-        if (signUpRequest.getIndustry() != null) {
-            orgProfile.setIndustry(Industry.valueOf(signUpRequest.getIndustry().toUpperCase()));
+        if (signUpRequest.getIndustry() != null && !signUpRequest.getIndustry().trim().isEmpty()) {
+            try {
+                orgProfile.setIndustry(Industry.valueOf(signUpRequest.getIndustry().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                orgProfile.setIndustry(Industry.OTHER);
+            }
         }
         
         orgProfile.setCompanySize(signUpRequest.getCompanySize());
