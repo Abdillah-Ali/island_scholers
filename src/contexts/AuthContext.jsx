@@ -1,3 +1,5 @@
+package com.islandscholars.context;
+
 import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -6,6 +8,8 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+const API_BASE_URL = 'http://localhost:8080/api';
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,119 +17,123 @@ export const AuthProvider = ({ children }) => {
   // Check for saved user in localStorage on initial load
   useEffect(() => {
     const savedUser = localStorage.getItem('islandScholarsUser');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('islandScholarsToken');
+    
+    if (savedUser && savedToken) {
       try {
         setCurrentUser(JSON.parse(savedUser));
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('islandScholarsUser');
+        localStorage.removeItem('islandScholarsToken');
       }
     }
     setLoading(false);
   }, []);
 
-  // Login function with improved error handling
-  const login = (emailOrUsername, password) => {
-    return new Promise((resolve, reject) => {
-      // Simulate API call delay
-      setTimeout(() => {
-        // Check for admin credentials (username without @ symbol)
-        if (emailOrUsername.toLowerCase() === 'abdillah' && password === '8Characters**') {
-          const adminUser = {
-            id: 'admin-1',
-            name: 'Abdillah Ali',
-            email: 'abdillah.va@gmail.com',
-            role: 'admin',
-            profileImage: '/Abdillah Ali.jpg',
-            createdAt: new Date().toISOString()
-          };
-          
-          setCurrentUser(adminUser);
-          localStorage.setItem('islandScholarsUser', JSON.stringify(adminUser));
-          resolve(adminUser);
-        } else {
-          // Improved error messages based on input format
-          if (!emailOrUsername.includes('@') && !emailOrUsername.includes('.')) {
-            // Username format - account not available
-            reject(new Error('Account not available'));
-          } else if (emailOrUsername.includes('@') && !emailOrUsername.includes('.com')) {
-            // Email without .com
-            reject(new Error('Please enter a valid email address with .com'));
-          } else {
-            // Valid email format but account doesn't exist
-            reject(new Error('Account not available'));
-          }
-        }
-      }, 800);
-    });
+  // Login function
+  const login = async (usernameOrEmail, password) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          usernameOrEmail,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      const user = {
+        id: data.id,
+        name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        role: data.role.toLowerCase(),
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+      };
+
+      setCurrentUser(user);
+      localStorage.setItem('islandScholarsUser', JSON.stringify(user));
+      localStorage.setItem('islandScholarsToken', data.accessToken);
+
+      return user;
+    } catch (error) {
+      throw new Error(error.message || 'Login failed');
+    }
   };
 
-  // Register function - now creates users successfully
-  const register = (userData) => {
-    return new Promise((resolve, reject) => {
-      // Simulate API call delay
-      setTimeout(() => {
-        try {
-          // Create a new user object
-          const newUser = {
-            id: `user-${Date.now()}`,
-            name: userData.role === 'organization' ? userData.companyName : userData.name,
-            email: userData.email,
-            role: userData.role,
-            profileImage: null,
-            createdAt: new Date().toISOString(),
-            // Add role-specific data
-            ...(userData.role === 'student' && {
-              university: userData.university,
-              studentId: userData.studentId,
-              fieldOfStudy: userData.fieldOfStudy,
-              yearOfStudy: userData.yearOfStudy,
-              phone: userData.phone,
-              skills: [],
-              documents: {}
-            }),
-            ...(userData.role === 'organization' && {
-              companyName: userData.companyName,
-              industry: userData.industry,
-              companySize: userData.companySize,
-              description: userData.description,
-              website: userData.website,
-              foundedYear: userData.foundedYear,
-              registrationNumber: userData.registrationNumber,
-              location: userData.location,
-              contactPerson: userData.contactPerson,
-              contactPhone: userData.contactPhone,
-              desiredSkills: []
-            }),
-            ...(userData.role === 'university' && {
-              universityName: userData.name,
-              description: userData.description,
-              website: userData.website,
-              establishedYear: userData.establishedYear,
-              studentCount: userData.studentCount,
-              facultyCount: userData.facultyCount,
-              location: userData.location,
-              programs: userData.programs || []
-            })
-          };
-
-          // Save user to localStorage and set as current user
-          setCurrentUser(newUser);
-          localStorage.setItem('islandScholarsUser', JSON.stringify(newUser));
+  // Register function
+  const register = async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.email.split('@')[0], // Use email prefix as username
+          email: userData.email,
+          password: userData.password,
+          firstName: userData.firstName || userData.name?.split(' ')[0] || '',
+          lastName: userData.lastName || userData.name?.split(' ').slice(1).join(' ') || '',
+          role: userData.role.toUpperCase(),
+          phoneNumber: userData.phone || userData.contactPhone,
+          location: userData.location,
+          bio: userData.bio || userData.description,
           
-          // Resolve with the new user
-          resolve(newUser);
-        } catch (error) {
-          reject(new Error('Registration failed. Please try again.'));
-        }
-      }, 1000);
-    });
+          // Student specific fields
+          university: userData.university,
+          studentId: userData.studentId,
+          yearOfStudy: userData.yearOfStudy ? parseInt(userData.yearOfStudy) : null,
+          fieldOfStudy: userData.fieldOfStudy,
+          skills: userData.skills || [],
+          
+          // Organization specific fields
+          companyName: userData.companyName,
+          industry: userData.industry,
+          companySize: userData.companySize,
+          description: userData.description,
+          website: userData.website,
+          foundedYear: userData.foundedYear ? parseInt(userData.foundedYear) : null,
+          registrationNumber: userData.registrationNumber,
+          desiredSkills: userData.desiredSkills || [],
+          
+          // University specific fields
+          universityName: userData.name,
+          establishedYear: userData.establishedYear ? parseInt(userData.establishedYear) : null,
+          studentCount: userData.studentCount ? parseInt(userData.studentCount) : null,
+          facultyCount: userData.facultyCount ? parseInt(userData.facultyCount) : null,
+          programs: userData.programs || [],
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      // After successful registration, log the user in
+      return await login(userData.email, userData.password);
+    } catch (error) {
+      throw new Error(error.message || 'Registration failed');
+    }
   };
 
   // Logout function
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('islandScholarsUser');
+    localStorage.removeItem('islandScholarsToken');
   };
 
   const value = {
