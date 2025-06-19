@@ -44,7 +44,12 @@ public class AuthService {
         // Try to find user by username or email
         User user = userRepository.findByUsername(loginRequest.getUsernameOrEmail())
                 .orElse(userRepository.findByEmail(loginRequest.getUsernameOrEmail())
-                        .orElseThrow(() -> new RuntimeException("User not found")));
+                        .orElseThrow(() -> new RuntimeException("User not found with username or email: " + loginRequest.getUsernameOrEmail())));
+
+        // Check if user is active
+        if (!user.isActive()) {
+            throw new RuntimeException("User account is deactivated");
+        }
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), loginRequest.getPassword()));
@@ -173,5 +178,28 @@ public class AuthService {
         university.setPrograms(signUpRequest.getPrograms());
 
         universityRepository.save(university);
+    }
+
+    @Transactional
+    public void createAdminUser() {
+        // Check if admin user already exists
+        if (userRepository.findByUsername("Abdillah").isPresent()) {
+            return; // Admin already exists
+        }
+
+        // Create admin user
+        User admin = new User();
+        admin.setUsername("Abdillah");
+        admin.setEmail("abdillah.va@gmail.com");
+        admin.setPassword(encoder.encode("8Characters**"));
+        admin.setFirstName("Abdillah");
+        admin.setLastName("Ali");
+        admin.setRole(Role.ADMIN);
+        admin.setLocation("Tunguu Zanzibar");
+        admin.setBio("System Administrator for Island Scholars platform");
+        admin.setActive(true);
+        admin.setVerified(true);
+
+        userRepository.save(admin);
     }
 }

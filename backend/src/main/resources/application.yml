@@ -3,7 +3,7 @@ spring:
     name: island-scholars-backend
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/island_scholars
+    url: jdbc:postgresql://localhost:5432/new_island_scholarsdb
     username: postgres
     password: password
     driver-class-name: org.postgresql.Driver
