@@ -1,6 +1,5 @@
 package com.islandscholars.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,26 +12,27 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
-
-    @Value("${cors.allowed-methods}")
-    private String allowedMethods;
-
-    @Value("${cors.allowed-headers}")
-    private String allowedHeaders;
-
-    @Value("${cors.allow-credentials}")
-    private boolean allowCredentials;
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        configuration.setAllowedMethods(Arrays.asList(allowedMethods.split(",")));
+        // Allow specific origins
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://fabulous-moxie-c71876.netlify.app"
+        ));
+        
+        // Allow all HTTP methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Allow all headers
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(allowCredentials);
+        
+        // Allow credentials
+        configuration.setAllowCredentials(true);
+        
+        // Set max age for preflight requests
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
