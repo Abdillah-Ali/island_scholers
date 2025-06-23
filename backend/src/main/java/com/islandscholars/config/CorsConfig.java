@@ -20,6 +20,7 @@ public class CorsConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
             "http://localhost:5173",
+            "http://localhost:5174", // Added frontend origin based on logs
             "https://fabulous-moxie-c71876.netlify.app"
         ));
         
