@@ -1,10 +1,11 @@
 package com.islandscholars;
 
-import com.islandscholars.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.islandscholars.service.AuthService;
 
 @SpringBootApplication
 public class IslandScholarsBackendApplication implements CommandLineRunner {
@@ -22,4 +23,3 @@ public class IslandScholarsBackendApplication implements CommandLineRunner {
         authService.createAdminUser();
     }
 }
-</invoke>

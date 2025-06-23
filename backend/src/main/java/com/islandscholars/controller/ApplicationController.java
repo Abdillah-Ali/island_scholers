@@ -1,22 +1,32 @@
 package com.islandscholars.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.islandscholars.model.Application;
 import com.islandscholars.model.ApplicationStatus;
-import com.islandscholars.model.Internship;
 import com.islandscholars.model.User;
 import com.islandscholars.repository.InternshipRepository;
 import com.islandscholars.repository.UserRepository;
 import com.islandscholars.security.services.UserDetailsImpl;
 import com.islandscholars.service.ApplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -35,11 +45,11 @@ public class ApplicationController {
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Application> createApplication(@Valid @RequestBody Application application,
-                                                        Authentication authentication) {
+                                                         Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User student = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         application.setStudent(student);
         Application savedApplication = applicationService.createApplication(application);
         return ResponseEntity.ok(savedApplication);
@@ -51,7 +61,7 @@ public class ApplicationController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User student = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         List<Application> applications = applicationService.getApplicationsByStudent(student);
         return ResponseEntity.ok(applications);
     }
@@ -62,24 +72,25 @@ public class ApplicationController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User organization = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         List<Application> applications = applicationService.getApplicationsByOrganization(organization);
         return ResponseEntity.ok(applications);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ORGANIZATION')")
-    public ResponseEntity<Application> getApplicationById(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<?> getApplicationById(@PathVariable Long id, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
+
         return applicationService.getApplicationById(id)
                 .map(application -> {
-                    // Check if user has permission to view this application
-                    if (application.getStudent().getId().equals(userDetails.getId()) ||
-                        application.getInternship().getOrganization().getId().equals(userDetails.getId())) {
+                    boolean isStudent = application.getStudent().getId().equals(userDetails.getId());
+                    boolean isOrganization = application.getInternship().getOrganization().getId().equals(userDetails.getId());
+
+                    if (isStudent || isOrganization) {
                         return ResponseEntity.ok().body(application);
                     } else {
-                        return ResponseEntity.forbiddenBuild();
+                        return new ResponseEntity<>("You are not authorized to view this application.", HttpStatus.FORBIDDEN);
                     }
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -88,21 +99,21 @@ public class ApplicationController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ORGANIZATION')")
     public ResponseEntity<Application> updateApplicationStatus(@PathVariable Long id,
-                                                              @RequestBody Map<String, Object> statusUpdate,
-                                                              Authentication authentication) {
+                                                                @RequestBody Map<String, Object> statusUpdate,
+                                                                Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
+
         Application application = applicationService.getApplicationById(id)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
-        
+
         // Verify that the application belongs to the authenticated organization
         if (!application.getInternship().getOrganization().getId().equals(userDetails.getId())) {
-            return ResponseEntity.forbiddenBuild();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         ApplicationStatus status = ApplicationStatus.valueOf((String) statusUpdate.get("status"));
         String reviewerNotes = (String) statusUpdate.get("reviewerNotes");
-        
+
         Application updatedApplication = applicationService.updateApplicationStatus(id, status, reviewerNotes);
         return ResponseEntity.ok(updatedApplication);
     }
@@ -113,7 +124,7 @@ public class ApplicationController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User student = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         Application withdrawnApplication = applicationService.withdrawApplication(id, student);
         return ResponseEntity.ok(withdrawnApplication);
     }
@@ -122,16 +133,18 @@ public class ApplicationController {
     @PreAuthorize("hasRole('STUDENT') or hasRole('ORGANIZATION')")
     public ResponseEntity<?> deleteApplication(@PathVariable Long id, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
+
         Application application = applicationService.getApplicationById(id)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
-        
+
         // Check if user has permission to delete this application
-        if (!application.getStudent().getId().equals(userDetails.getId()) &&
-            !application.getInternship().getOrganization().getId().equals(userDetails.getId())) {
-            return ResponseEntity.forbiddenBuild();
+        boolean isStudent = application.getStudent().getId().equals(userDetails.getId());
+        boolean isOrganization = application.getInternship().getOrganization().getId().equals(userDetails.getId());
+
+        if (!isStudent && !isOrganization) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         applicationService.deleteApplication(id);
         return ResponseEntity.ok().build();
     }

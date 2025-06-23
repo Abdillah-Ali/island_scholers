@@ -1,18 +1,29 @@
 package com.islandscholars.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.islandscholars.model.Event;
 import com.islandscholars.model.User;
 import com.islandscholars.repository.UserRepository;
 import com.islandscholars.security.services.UserDetailsImpl;
 import com.islandscholars.service.EventService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -50,7 +61,7 @@ public class EventController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User organization = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         event.setOrganization(organization);
         Event savedEvent = eventService.createEvent(event);
         return ResponseEntity.ok(savedEvent);
@@ -59,17 +70,17 @@ public class EventController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ORGANIZATION')")
     public ResponseEntity<Event> updateEvent(@PathVariable Long id, @Valid @RequestBody Event eventDetails,
-                                            Authentication authentication) {
+                                             Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
+
         // Verify that the event belongs to the authenticated organization
         Event existingEvent = eventService.getEventById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
-        
+
         if (!existingEvent.getOrganization().getId().equals(userDetails.getId())) {
-            return ResponseEntity.forbiddenBuild();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         Event updatedEvent = eventService.updateEvent(id, eventDetails);
         return ResponseEntity.ok(updatedEvent);
     }
@@ -78,15 +89,15 @@ public class EventController {
     @PreAuthorize("hasRole('ORGANIZATION')")
     public ResponseEntity<?> deleteEvent(@PathVariable Long id, Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        
+
         // Verify that the event belongs to the authenticated organization
         Event existingEvent = eventService.getEventById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
-        
+
         if (!existingEvent.getOrganization().getId().equals(userDetails.getId())) {
-            return ResponseEntity.forbiddenBuild();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        
+
         eventService.deleteEvent(id);
         return ResponseEntity.ok().build();
     }
@@ -97,7 +108,7 @@ public class EventController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User organization = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         List<Event> events = eventService.getEventsByOrganization(organization);
         return ResponseEntity.ok(events);
     }
