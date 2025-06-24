@@ -1,21 +1,29 @@
 package com.islandscholars.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.islandscholars.dto.MessageResponse;
 import com.islandscholars.dto.auth.JwtResponse;
 import com.islandscholars.dto.auth.LoginRequest;
 import com.islandscholars.dto.auth.SignupRequest;
 import com.islandscholars.service.AuthService;
+
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    AuthService authService;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -23,7 +31,8 @@ public class AuthController {
             JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
             return ResponseEntity.ok(jwtResponse);
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
+            return ResponseEntity
+                    .badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
     }
@@ -34,13 +43,13 @@ public class AuthController {
             String message = authService.registerUser(signUpRequest);
             return ResponseEntity.ok(new MessageResponse(message));
         } catch (Exception e) {
-            e.printStackTrace(); // Add logging for debugging
-            return ResponseEntity.badRequest()
+            e.printStackTrace(); // Consider adding a proper logger instead
+            return ResponseEntity
+                    .badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
     }
 
-    // Add a test endpoint to verify the API is working
     @GetMapping("/test")
     public ResponseEntity<?> testEndpoint() {
         return ResponseEntity.ok(new MessageResponse("API is working!"));

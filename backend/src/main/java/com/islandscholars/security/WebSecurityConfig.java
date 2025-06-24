@@ -1,8 +1,5 @@
 package com.islandscholars.security;
 
-import com.islandscholars.security.jwt.AuthEntryPointJwt;
-import com.islandscholars.security.jwt.AuthTokenFilter;
-import com.islandscholars.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,13 +16,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.islandscholars.security.jwt.AuthEntryPointJwt;
+import com.islandscholars.security.jwt.AuthTokenFilter;
+import com.islandscholars.security.services.UserDetailsServiceImpl;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
     @Autowired
-    UserDetailsServiceImpl userDetailsService;
+    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
@@ -58,18 +59,19 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource))
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/auth/**").permitAll()
-                    .requestMatchers("/internships/**").permitAll()
-                    .requestMatchers("/organizations/**").permitAll()
-                    .requestMatchers("/universities/**").permitAll()
-                    .requestMatchers("/events/**").permitAll()
-                    .requestMatchers("/applications/**").authenticated()
-                    .anyRequest().authenticated()
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/internships/**").permitAll()
+                .requestMatchers("/organizations/**").permitAll()
+                .requestMatchers("/universities/**").permitAll()
+                .requestMatchers("/events/**").permitAll()
+                .requestMatchers("/applications/**").authenticated()
+                .anyRequest().authenticated()
             );
 
         http.authenticationProvider(authenticationProvider());
