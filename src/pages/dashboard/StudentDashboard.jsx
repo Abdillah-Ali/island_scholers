@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaGraduationCap, FaFile, FaCheckCircle, FaClock, FaBuilding, FaPaperPlane } from 'react-icons/fa';
+import { FaGraduationCap, FaFile, FaCheckCircle, FaClock, FaBuilding, FaPaperPlane, FaExclamationTriangle } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { applicationsApi, internshipsApi, organizationsApi } from '../../services/api';
+import { useApi } from '../../hooks/useApi';
 import StatCard from '../../components/dashboard/StatCard';
 
 const StudentDashboard = () => {
@@ -10,38 +12,50 @@ const StudentDashboard = () => {
   const [applications, setApplications] = useState([]);
   const [recommendedInternships, setRecommendedInternships] = useState([]);
   const [organizations, setOrganizations] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showDirectApplicationModal, setShowDirectApplicationModal] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState(null);
+  
+  const { loading, error, execute } = useApi();
   
   useEffect(() => {
     fetchDashboardData();
   }, [currentUser]);
 
   const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      // In a real app, these would be API calls to your Django backend
-      // const [applicationsRes, internshipsRes, organizationsRes] = await Promise.all([
-      //   fetch('/api/applications/my-applications/'),
-      //   fetch('/api/internships/recommended/'),
-      //   fetch('/api/organizations/')
-      // ]);
-      
-      // For now, we'll use empty arrays since we removed sample data
-      setApplications([]);
-      setRecommendedInternships([]);
-      setOrganizations([]);
-    } catch (err) {
-      console.error('Error fetching dashboard data:', err);
-    } finally {
-      setLoading(false);
-    }
+    await execute(
+      async () => {
+        try {
+          // Fetch applications
+          const applicationsData = await applicationsApi.getMyApplications();
+          setApplications(applicationsData);
+
+          // Fetch recommended internships (first 5)
+          const internshipsData = await internshipsApi.getAll({ limit: 5 });
+          setRecommendedInternships(internshipsData.slice(0, 5));
+
+          // Fetch organizations for direct application
+          const organizationsData = await organizationsApi.getAll({ limit: 10 });
+          setOrganizations(organizationsData.slice(0, 10));
+        } catch (err) {
+          console.error('Error fetching dashboard data:', err);
+          // Set empty arrays on error to prevent UI issues
+          setApplications([]);
+          setRecommendedInternships([]);
+          setOrganizations([]);
+        }
+      },
+      {
+        showLoading: true,
+        onError: (err) => {
+          console.error('Dashboard data fetch failed:', err);
+        }
+      }
+    );
   };
   
   // Count applications by status
-  const pendingCount = applications.filter(app => app.status === 'pending').length;
-  const acceptedCount = applications.filter(app => app.status === 'accepted').length;
+  const pendingCount = applications.filter(app => app.status === 'PENDING').length;
+  const acceptedCount = applications.filter(app => app.status === 'ACCEPTED').length;
   const totalApplications = applications.length;
 
   const handleDirectApplication = (organization) => {
@@ -49,7 +63,24 @@ const StudentDashboard = () => {
     setShowDirectApplicationModal(true);
   };
 
-  if (loading) {
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'UNDER_REVIEW':
+        return 'bg-blue-100 text-blue-800';
+      case 'ACCEPTED':
+        return 'bg-green-100 text-green-800';
+      case 'REJECTED':
+        return 'bg-red-100 text-red-800';
+      case 'WITHDRAWN':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading && applications.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
@@ -80,6 +111,23 @@ const StudentDashboard = () => {
           </Link>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-center rounded-md">
+          <FaExclamationTriangle className="mr-3" />
+          <div>
+            <p className="font-medium">Error loading dashboard data</p>
+            <p className="text-sm">{error}</p>
+            <button 
+              onClick={fetchDashboardData}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -122,33 +170,25 @@ const StudentDashboard = () => {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="text-lg font-medium text-gray-800">
-                          {application.internship_title || 'Direct Application'}
+                          {application.internship?.title || 'Direct Application'}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Applied on {new Date(application.applied_at).toLocaleDateString()}
+                          Applied on {new Date(application.appliedAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          application.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : application.status === 'accepted'
-                            ? 'bg-green-100 text-green-800'
-                            : application.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(application.status)}`}>
+                          {application.status.charAt(0).toUpperCase() + application.status.slice(1).toLowerCase()}
                         </span>
                       </div>
                     </div>
                     <div className="mt-2 flex justify-between items-center">
                       <p className="text-sm text-gray-500 truncate max-w-xs">
-                        {application.organization_name}
+                        {application.internship?.organization?.companyName || 'Organization'}
                       </p>
                       {application.internship && (
                         <Link 
-                          to={`/internships/${application.internship}`} 
+                          to={`/internships/${application.internship.id}`} 
                           className="text-sm text-primary-600 hover:text-primary-700"
                         >
                           View Details
@@ -192,14 +232,14 @@ const StudentDashboard = () => {
                     <p className="text-sm text-gray-500 mt-1">{internship.description?.substring(0, 80)}...</p>
                     <div className="mt-2 flex justify-between items-center">
                       <div className="flex flex-wrap gap-1">
-                        {internship.skills_required?.slice(0, 2).map(skill => (
+                        {internship.skillsRequired?.slice(0, 2).map(skill => (
                           <span key={skill} className="inline-block bg-primary-100 text-primary-800 text-xs px-2 py-0.5 rounded">
                             {skill}
                           </span>
                         ))}
-                        {internship.skills_required?.length > 2 && (
+                        {internship.skillsRequired?.length > 2 && (
                           <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded">
-                            +{internship.skills_required.length - 2}
+                            +{internship.skillsRequired.length - 2}
                           </span>
                         )}
                       </div>
@@ -257,18 +297,18 @@ const StudentDashboard = () => {
                         className="p-4 border rounded-lg cursor-pointer hover:border-primary-500 hover:bg-primary-50"
                       >
                         <div className="flex items-center">
-                          {org.user?.profile_image ? (
+                          {org.user?.profileImage ? (
                             <img
-                              src={org.user.profile_image}
-                              alt={org.company_name}
+                              src={org.user.profileImage}
+                              alt={org.companyName}
                               className="w-12 h-12 rounded-full object-cover"
                             />
                           ) : (
                             <FaBuilding className="w-12 h-12 text-gray-400" />
                           )}
                           <div className="ml-4">
-                            <h3 className="font-medium text-gray-800">{org.company_name}</h3>
-                            <p className="text-sm text-gray-600">{org.industry}</p>
+                            <h3 className="font-medium text-gray-800">{org.companyName}</h3>
+                            <p className="text-sm text-gray-600 capitalize">{org.industry}</p>
                           </div>
                         </div>
                       </div>
@@ -284,10 +324,10 @@ const StudentDashboard = () => {
             ) : (
               <div>
                 <div className="flex items-center mb-6">
-                  {selectedOrganization.user?.profile_image ? (
+                  {selectedOrganization.user?.profileImage ? (
                     <img
-                      src={selectedOrganization.user.profile_image}
-                      alt={selectedOrganization.company_name}
+                      src={selectedOrganization.user.profileImage}
+                      alt={selectedOrganization.companyName}
                       className="w-16 h-16 rounded-full object-cover"
                     />
                   ) : (
@@ -295,9 +335,9 @@ const StudentDashboard = () => {
                   )}
                   <div className="ml-4">
                     <h3 className="text-xl font-medium text-gray-800">
-                      {selectedOrganization.company_name}
+                      {selectedOrganization.companyName}
                     </h3>
-                    <p className="text-gray-600">{selectedOrganization.industry}</p>
+                    <p className="text-gray-600 capitalize">{selectedOrganization.industry}</p>
                   </div>
                 </div>
                 
@@ -321,20 +361,12 @@ const StudentDashboard = () => {
                   </div>
                   
                   <div>
-                    <label className="label">Resume</label>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                      <div className="space-y-1 text-center">
-                        <FaFile className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="flex text-sm text-gray-600">
-                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">
-                            <span>Upload a file</span>
-                            <input type="file" className="sr-only" />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs text-gray-500">PDF up to 10MB</p>
-                      </div>
-                    </div>
+                    <label className="label">Resume URL</label>
+                    <input
+                      type="url"
+                      className="input"
+                      placeholder="https://drive.google.com/file/d/your-resume-link"
+                    />
                   </div>
                 </form>
               </div>

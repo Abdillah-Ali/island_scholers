@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import { authApi, ApiError } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -6,49 +7,45 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-const API_BASE_URL = 'http://localhost:8080/api';
-
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Check for saved user in localStorage on initial load
   useEffect(() => {
-    const savedUser = localStorage.getItem('islandScholarsUser');
-    const savedToken = localStorage.getItem('islandScholarsToken');
-    
-    if (savedUser && savedToken) {
-      try {
-        setCurrentUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('islandScholarsUser');
-        localStorage.removeItem('islandScholarsToken');
+    const initializeAuth = async () => {
+      const savedUser = localStorage.getItem('islandScholarsUser');
+      const savedToken = localStorage.getItem('islandScholarsToken');
+      
+      if (savedUser && savedToken) {
+        try {
+          const user = JSON.parse(savedUser);
+          
+          // Verify token is still valid by testing connection
+          await authApi.testConnection();
+          setCurrentUser(user);
+        } catch (error) {
+          console.error('Token validation failed:', error);
+          // Clear invalid token and user data
+          localStorage.removeItem('islandScholarsUser');
+          localStorage.removeItem('islandScholarsToken');
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   // Test API connection
   const testConnection = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/test`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        console.error('API connection test failed:', response.status);
-        return false;
-      }
-      
-      const data = await response.json();
-      console.log('API connection test successful:', data);
+      const response = await authApi.testConnection();
+      console.log('API connection test successful:', response);
       return true;
     } catch (error) {
-      console.error('API connection test error:', error);
+      console.error('API connection test failed:', error);
       return false;
     }
   };
@@ -56,53 +53,45 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (usernameOrEmail, password) => {
     try {
-      console.log('Attempting login with:', { usernameOrEmail });
-      
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          usernameOrEmail,
-          password,
-        }),
+      setError(null);
+      setLoading(true);
+
+      const response = await authApi.login({
+        usernameOrEmail,
+        password,
       });
 
-      console.log('Login response status:', response.status);
-
-      const data = await response.json();
-      console.log('Login response data:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
       const user = {
-        id: data.id,
-        name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        role: data.role.toLowerCase(),
-        firstName: data.firstName,
-        lastName: data.lastName,
-        username: data.username,
+        id: response.id,
+        name: `${response.firstName} ${response.lastName}`,
+        email: response.email,
+        role: response.role.toLowerCase(),
+        firstName: response.firstName,
+        lastName: response.lastName,
+        username: response.username,
       };
 
       setCurrentUser(user);
       localStorage.setItem('islandScholarsUser', JSON.stringify(user));
-      localStorage.setItem('islandScholarsToken', data.accessToken);
+      localStorage.setItem('islandScholarsToken', response.accessToken);
 
       return user;
     } catch (error) {
-      console.error('Login error:', error);
-      throw new Error(error.message || 'Login failed');
+      const errorMessage = error instanceof ApiError 
+        ? error.message 
+        : 'Login failed. Please try again.';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Register function
   const register = async (userData) => {
     try {
-      console.log('Attempting registration with:', userData);
+      setError(null);
+      setLoading(true);
       
       // Test connection first
       const connectionOk = await testConnection();
@@ -146,38 +135,32 @@ export const AuthProvider = ({ children }) => {
         programs: userData.programs || [],
       };
 
-      console.log('Sending registration request:', requestBody);
-
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      console.log('Registration response status:', response.status);
-
-      const data = await response.json();
-      console.log('Registration response data:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
+      await authApi.register(requestBody);
 
       // After successful registration, log the user in
       return await login(userData.email, userData.password);
     } catch (error) {
-      console.error('Registration error:', error);
-      throw new Error(error.message || 'Registration failed');
+      const errorMessage = error instanceof ApiError 
+        ? error.message 
+        : 'Registration failed. Please try again.';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Logout function
   const logout = () => {
     setCurrentUser(null);
+    setError(null);
     localStorage.removeItem('islandScholarsUser');
     localStorage.removeItem('islandScholarsToken');
+  };
+
+  // Clear error function
+  const clearError = () => {
+    setError(null);
   };
 
   const value = {
@@ -186,12 +169,15 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     testConnection,
-    isAuthenticated: !!currentUser
+    clearError,
+    isAuthenticated: !!currentUser,
+    loading,
+    error
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

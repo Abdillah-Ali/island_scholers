@@ -1,92 +1,93 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaSearch, FaMapMarkerAlt, FaClock, FaBuilding, FaFilter } from 'react-icons/fa';
+import { FaSearch, FaMapMarkerAlt, FaClock, FaBuilding, FaFilter, FaExclamationTriangle } from 'react-icons/fa';
+import { internshipsApi } from '../../services/api';
+import { useApi } from '../../hooks/useApi';
 
 const InternshipExplore = () => {
   const [internships, setInternships] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
-    search: '',
+    title: '',
     location: '',
     remote: false,
-    duration: '',
-    skills: []
+    duration: ''
   });
   
+  const { loading, error, execute, clearError } = useApi();
+
   useEffect(() => {
     fetchInternships();
   }, []);
 
-  const fetchInternships = async () => {
-    try {
-      setLoading(true);
-      // In a real app, this would be an API call to your Django backend
-      // const response = await fetch('/api/internships/');
-      // const data = await response.json();
-      
-      // For now, we'll use an empty array since we removed sample data
-      setInternships([]);
-      setError('');
-    } catch (err) {
-      setError('Failed to fetch internships');
-      console.error('Error fetching internships:', err);
-    } finally {
-      setLoading(false);
-    }
+  const fetchInternships = async (searchFilters = {}) => {
+    await execute(
+      () => internshipsApi.getAll(searchFilters),
+      {
+        onSuccess: (data) => {
+          setInternships(data);
+          clearError();
+        },
+        onError: (err) => {
+          console.error('Failed to fetch internships:', err);
+          setInternships([]);
+        }
+      }
+    );
   };
 
   const handleSearchChange = (e) => {
-    setFilters(prev => ({ ...prev, search: e.target.value }));
+    const newFilters = { ...filters, title: e.target.value };
+    setFilters(newFilters);
+    
+    // Debounce search
+    clearTimeout(window.searchTimeout);
+    window.searchTimeout = setTimeout(() => {
+      fetchInternships(newFilters);
+    }, 500);
   };
   
   const handleLocationChange = (e) => {
-    setFilters(prev => ({ ...prev, location: e.target.value }));
+    const newFilters = { ...filters, location: e.target.value };
+    setFilters(newFilters);
+    
+    clearTimeout(window.locationTimeout);
+    window.locationTimeout = setTimeout(() => {
+      fetchInternships(newFilters);
+    }, 500);
   };
   
   const handleRemoteChange = (e) => {
-    setFilters(prev => ({ ...prev, remote: e.target.checked }));
+    const newFilters = { ...filters, isRemote: e.target.checked };
+    setFilters(newFilters);
+    fetchInternships(newFilters);
   };
 
   const handleDurationChange = (e) => {
-    setFilters(prev => ({ ...prev, duration: e.target.value }));
+    const newFilters = { ...filters, duration: e.target.value };
+    setFilters(newFilters);
+    fetchInternships(newFilters);
   };
 
-  // Filter internships based on current filters
-  const filteredInternships = internships.filter(internship => {
-    const matchesSearch = filters.search === '' || 
-      internship.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
-      internship.description?.toLowerCase().includes(filters.search.toLowerCase());
-    
-    const matchesLocation = filters.location === '' || 
-      internship.location?.toLowerCase().includes(filters.location.toLowerCase());
-    
-    const matchesRemote = !filters.remote || internship.is_remote;
-    
-    const matchesDuration = filters.duration === '' || internship.duration === filters.duration;
-    
-    return matchesSearch && matchesLocation && matchesRemote && matchesDuration;
-  });
+  const handleClearFilters = () => {
+    const clearedFilters = {
+      title: '',
+      location: '',
+      remote: false,
+      duration: ''
+    };
+    setFilters(clearedFilters);
+    fetchInternships();
+  };
 
-  if (loading) {
+  const hasActiveFilters = Object.values(filters).some(value => 
+    value && value !== false && value !== ''
+  );
+
+  if (loading && internships.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">{error}</div>
-        <button 
-          onClick={fetchInternships}
-          className="btn-primary"
-        >
-          Try Again
-        </button>
       </div>
     );
   }
@@ -99,6 +100,23 @@ const InternshipExplore = () => {
         <p className="text-gray-600">Find amazing internship opportunities across Tanzania and Zanzibar</p>
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-center rounded-md">
+          <FaExclamationTriangle className="mr-3" />
+          <div>
+            <p className="font-medium">Error loading internships</p>
+            <p className="text-sm">{error}</p>
+            <button 
+              onClick={() => fetchInternships(filters)}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -109,7 +127,7 @@ const InternshipExplore = () => {
               <input
                 type="text"
                 placeholder="Search internships..."
-                value={filters.search}
+                value={filters.title}
                 onChange={handleSearchChange}
                 className="input pl-10"
               />
@@ -138,13 +156,13 @@ const InternshipExplore = () => {
               className="input"
             >
               <option value="">All Durations</option>
-              <option value="1_month">1 Month</option>
-              <option value="2_months">2 Months</option>
-              <option value="3_months">3 Months</option>
-              <option value="4_months">4 Months</option>
-              <option value="5_months">5 Months</option>
-              <option value="6_months">6 Months</option>
-              <option value="other">Other</option>
+              <option value="ONE_MONTH">1 Month</option>
+              <option value="TWO_MONTHS">2 Months</option>
+              <option value="THREE_MONTHS">3 Months</option>
+              <option value="FOUR_MONTHS">4 Months</option>
+              <option value="FIVE_MONTHS">5 Months</option>
+              <option value="SIX_MONTHS">6 Months</option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
         </div>
@@ -164,27 +182,28 @@ const InternshipExplore = () => {
             </label>
           </div>
 
-          {(filters.search || filters.location || filters.remote || filters.duration) && (
+          {hasActiveFilters && (
             <button
-              onClick={() => setFilters({
-                search: '',
-                location: '',
-                remote: false,
-                duration: '',
-                skills: []
-              })}
+              onClick={handleClearFilters}
               className="text-sm text-primary-600 hover:text-primary-700"
             >
               Clear Filters
             </button>
           )}
+
+          {loading && (
+            <div className="flex items-center text-sm text-gray-500">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500 mr-2"></div>
+              Searching...
+            </div>
+          )}
         </div>
       </div>
       
       {/* Internship Listings */}
-      {filteredInternships.length > 0 ? (
+      {internships.length > 0 ? (
         <div className="space-y-6">
-          {filteredInternships.map(internship => (
+          {internships.map(internship => (
             <motion.div
               key={internship.id}
               initial={{ opacity: 0, y: 20 }}
@@ -195,10 +214,10 @@ const InternshipExplore = () => {
               <div className="flex flex-col md:flex-row gap-6">
                 {/* Organization Logo */}
                 <div className="flex-shrink-0">
-                  {internship.organization?.profile_image ? (
+                  {internship.organization?.profileImage ? (
                     <img
-                      src={internship.organization.profile_image}
-                      alt={internship.organization_name}
+                      src={internship.organization.profileImage}
+                      alt={internship.organization?.companyName}
                       className="w-16 h-16 rounded-lg object-cover"
                     />
                   ) : (
@@ -215,7 +234,7 @@ const InternshipExplore = () => {
                       <h2 className="text-xl font-semibold text-gray-800">
                         {internship.title}
                       </h2>
-                      <div className="text-gray-600">{internship.organization_name}</div>
+                      <div className="text-gray-600">{internship.organization?.companyName}</div>
                     </div>
                     
                     <Link
@@ -239,21 +258,21 @@ const InternshipExplore = () => {
                       <FaClock className="mr-1" />
                       <span>{internship.duration?.replace('_', ' ')}</span>
                     </div>
-                    {internship.is_remote && (
+                    {internship.isRemote && (
                       <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                         Remote
                       </span>
                     )}
-                    {internship.stipend_amount && (
+                    {internship.stipendAmount && (
                       <span className="bg-accent-100 text-accent-800 text-xs px-2 py-1 rounded-full">
-                        TZS {parseInt(internship.stipend_amount).toLocaleString()}
+                        TZS {parseInt(internship.stipendAmount).toLocaleString()}
                       </span>
                     )}
                   </div>
                   
-                  {internship.skills_required && internship.skills_required.length > 0 && (
+                  {internship.skillsRequired && internship.skillsRequired.length > 0 && (
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {internship.skills_required.slice(0, 5).map((skill, index) => (
+                      {internship.skillsRequired.slice(0, 5).map((skill, index) => (
                         <span
                           key={index}
                           className="bg-primary-50 text-primary-700 text-sm px-3 py-1 rounded-full"
@@ -261,17 +280,17 @@ const InternshipExplore = () => {
                           {skill}
                         </span>
                       ))}
-                      {internship.skills_required.length > 5 && (
+                      {internship.skillsRequired.length > 5 && (
                         <span className="bg-gray-50 text-gray-700 text-sm px-3 py-1 rounded-full">
-                          +{internship.skills_required.length - 5} more
+                          +{internship.skillsRequired.length - 5} more
                         </span>
                       )}
                     </div>
                   )}
 
-                  {internship.application_deadline && (
+                  {internship.applicationDeadline && (
                     <div className="mt-3 text-sm text-gray-500">
-                      Application deadline: {new Date(internship.application_deadline).toLocaleDateString()}
+                      Application deadline: {new Date(internship.applicationDeadline).toLocaleDateString()}
                     </div>
                   )}
                 </div>
@@ -283,18 +302,18 @@ const InternshipExplore = () => {
         <div className="text-center py-12">
           <FaSearch className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-lg font-medium text-gray-900">
-            {Object.values(filters).some(f => f && f !== false && (!Array.isArray(f) || f.length > 0)) 
+            {hasActiveFilters 
               ? 'No internships found' 
               : 'No internships available yet'
             }
           </h3>
           <p className="mt-1 text-gray-500">
-            {Object.values(filters).some(f => f && f !== false && (!Array.isArray(f) || f.length > 0))
+            {hasActiveFilters
               ? 'Try adjusting your search filters'
               : 'Internships will appear here once organizations post them'
             }
           </p>
-          {!Object.values(filters).some(f => f && f !== false && (!Array.isArray(f) || f.length > 0)) && (
+          {!hasActiveFilters && (
             <div className="mt-6">
               <Link to="/register" className="btn-primary">
                 Post an Internship

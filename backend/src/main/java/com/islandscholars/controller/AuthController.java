@@ -1,6 +1,7 @@
 package com.islandscholars.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,8 +16,9 @@ import com.islandscholars.service.AuthService;
 
 import jakarta.validation.Valid;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -52,6 +54,6 @@ public class AuthController {
 
     @GetMapping("/test")
     public ResponseEntity<?> testEndpoint() {
-        return ResponseEntity.ok(new MessageResponse("API is working!"));
+        return ResponseEntity.ok(new MessageResponse("API is working! Backend connection successful."));
     }
 }

@@ -65,12 +65,22 @@ public class WebSecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/internships/**").permitAll()
-                .requestMatchers("/organizations/**").permitAll()
-                .requestMatchers("/universities/**").permitAll()
-                .requestMatchers("/events/**").permitAll()
-                .requestMatchers("/applications/**").authenticated()
+                // Public endpoints
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/internships").permitAll()
+                .requestMatchers("/api/internships/{id}").permitAll()
+                .requestMatchers("/api/organizations").permitAll()
+                .requestMatchers("/api/organizations/{id}").permitAll()
+                .requestMatchers("/api/universities").permitAll()
+                .requestMatchers("/api/universities/{id}").permitAll()
+                .requestMatchers("/api/universities/by-name/{name}").permitAll()
+                .requestMatchers("/api/events").permitAll()
+                .requestMatchers("/api/events/upcoming").permitAll()
+                .requestMatchers("/api/events/{id}").permitAll()
+                // Protected endpoints
+                .requestMatchers("/api/applications/**").authenticated()
+                .requestMatchers("/api/internships/my-internships").authenticated()
+                .requestMatchers("/api/events/my-events").authenticated()
                 .anyRequest().authenticated()
             );
 

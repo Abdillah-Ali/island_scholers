@@ -1,67 +1,75 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaSearch, FaBuilding, FaMapMarkerAlt, FaBriefcase } from 'react-icons/fa';
+import { FaSearch, FaBuilding, FaMapMarkerAlt, FaBriefcase, FaExclamationTriangle } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+import { organizationsApi } from '../../services/api';
+import { useApi } from '../../hooks/useApi';
 
 const OrganizationList = () => {
   const { isAuthenticated, currentUser } = useAuth();
   const [organizations, setOrganizations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [industry, setIndustry] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  
+  const { loading, error, execute } = useApi();
   
   useEffect(() => {
     fetchOrganizations();
   }, []);
 
-  const fetchOrganizations = async () => {
-    try {
-      setLoading(true);
-      // In a real app, this would be an API call to your Django backend
-      // const response = await fetch('/api/organizations/');
-      // const data = await response.json();
-      
-      // For now, we'll use an empty array since we removed sample data
-      setOrganizations([]);
-      setError('');
-    } catch (err) {
-      setError('Failed to fetch organizations');
-      console.error('Error fetching organizations:', err);
-    } finally {
-      setLoading(false);
-    }
+  const fetchOrganizations = async (filters = {}) => {
+    await execute(
+      () => organizationsApi.getAll(filters),
+      {
+        onSuccess: (data) => {
+          setOrganizations(data);
+        },
+        onError: (err) => {
+          console.error('Failed to fetch organizations:', err);
+          setOrganizations([]);
+        }
+      }
+    );
   };
 
-  const filteredOrganizations = organizations.filter(org => {
-    const matchesSearch = searchTerm === '' || 
-      org.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      org.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesIndustry = industry === '' || org.industry === industry;
-    
-    return matchesSearch && matchesIndustry;
-  });
-  
-  if (loading) {
+  const handleSearch = () => {
+    const filters = {};
+    if (searchTerm.trim()) {
+      filters.search = searchTerm.trim();
+    }
+    if (industry) {
+      filters.industry = industry;
+    }
+    fetchOrganizations(filters);
+  };
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      handleSearch();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, industry]);
+
+  const industries = [
+    'TECHNOLOGY',
+    'TELECOMMUNICATIONS', 
+    'BANKING',
+    'AVIATION',
+    'HEALTHCARE',
+    'EDUCATION',
+    'MANUFACTURING',
+    'AGRICULTURE',
+    'TOURISM',
+    'OTHER'
+  ];
+
+  if (loading && organizations.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">{error}</div>
-        <button 
-          onClick={fetchOrganizations}
-          className="btn-primary"
-        >
-          Try Again
-        </button>
       </div>
     );
   }
@@ -73,6 +81,23 @@ const OrganizationList = () => {
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Organizations</h1>
         <p className="text-gray-600">Discover leading organizations across Tanzania and Zanzibar</p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-center rounded-md">
+          <FaExclamationTriangle className="mr-3" />
+          <div>
+            <p className="font-medium">Error loading organizations</p>
+            <p className="text-sm">{error}</p>
+            <button 
+              onClick={() => fetchOrganizations()}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -99,25 +124,27 @@ const OrganizationList = () => {
               className="input"
             >
               <option value="">All Industries</option>
-              <option value="technology">Technology</option>
-              <option value="telecommunications">Telecommunications</option>
-              <option value="banking">Banking & Finance</option>
-              <option value="aviation">Aviation</option>
-              <option value="healthcare">Healthcare</option>
-              <option value="education">Education</option>
-              <option value="manufacturing">Manufacturing</option>
-              <option value="agriculture">Agriculture</option>
-              <option value="tourism">Tourism</option>
-              <option value="other">Other</option>
+              {industries.map(ind => (
+                <option key={ind} value={ind}>
+                  {ind.charAt(0) + ind.slice(1).toLowerCase().replace('_', ' ')}
+                </option>
+              ))}
             </select>
           </div>
+
+          {loading && (
+            <div className="flex items-center text-sm text-gray-500">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500 mr-2"></div>
+              Searching...
+            </div>
+          )}
         </div>
       </div>
       
       {/* Organizations List */}
-      {filteredOrganizations.length > 0 ? (
+      {organizations.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredOrganizations.map(org => (
+          {organizations.map(org => (
             <motion.div
               key={org.id}
               initial={{ opacity: 0, y: 20 }}
@@ -126,10 +153,10 @@ const OrganizationList = () => {
               className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
             >
               <div className="flex items-center mb-4">
-                {org.user?.profile_image ? (
+                {org.user?.profileImage ? (
                   <img
-                    src={org.user.profile_image}
-                    alt={org.company_name}
+                    src={org.user.profileImage}
+                    alt={org.companyName}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                 ) : (
@@ -138,8 +165,10 @@ const OrganizationList = () => {
                   </div>
                 )}
                 <div className="ml-4">
-                  <h3 className="text-xl font-semibold text-gray-800">{org.company_name}</h3>
-                  <p className="text-gray-600 capitalize">{org.industry}</p>
+                  <h3 className="text-xl font-semibold text-gray-800">{org.companyName}</h3>
+                  <p className="text-gray-600 capitalize">
+                    {org.industry?.toLowerCase().replace('_', ' ')}
+                  </p>
                 </div>
               </div>
               
