@@ -1,6 +1,7 @@
 package com.islandscholars.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "*") // Adjust allowed origins if needed
 public class AuthController {
 
     private final AuthService authService;
@@ -43,7 +45,7 @@ public class AuthController {
             String message = authService.registerUser(signUpRequest);
             return ResponseEntity.ok(new MessageResponse(message));
         } catch (Exception e) {
-            e.printStackTrace(); // Consider adding a proper logger instead
+            e.printStackTrace(); // Consider using a proper logger
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
@@ -52,6 +54,6 @@ public class AuthController {
 
     @GetMapping("/test")
     public ResponseEntity<?> testEndpoint() {
-        return ResponseEntity.ok(new MessageResponse("API is working!"));
+        return ResponseEntity.ok(new MessageResponse("Backend is running"));
     }
 }

@@ -65,16 +65,17 @@ public class WebSecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/internships/**").permitAll()
-                .requestMatchers("/organizations/**").permitAll()
-                .requestMatchers("/universities/**").permitAll()
-                .requestMatchers("/events/**").permitAll()
-                .requestMatchers("/applications/**").authenticated()
+                .requestMatchers("/api/auth/**").permitAll()    // Allow unauthenticated access to auth APIs
+                .requestMatchers("/api/internships/**").permitAll()
+                .requestMatchers("/api/organizations/**").permitAll()
+                .requestMatchers("/api/universities/**").permitAll()
+                .requestMatchers("/api/events/**").permitAll()
+                .requestMatchers("/api/applications/**").authenticated()
                 .anyRequest().authenticated()
             );
 
         http.authenticationProvider(authenticationProvider());
+
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

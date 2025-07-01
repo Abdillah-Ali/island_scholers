@@ -5,9 +5,11 @@ import com.islandscholars.model.ApplicationStatus;
 import com.islandscholars.model.Internship;
 import com.islandscholars.model.User;
 import com.islandscholars.repository.ApplicationRepository;
+import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +36,7 @@ public class ApplicationService {
         // Check if student already applied for this internship
         Optional<Application> existingApplication = applicationRepository
                 .findByStudentAndInternship(application.getStudent(), application.getInternship());
-        
+
         if (existingApplication.isPresent()) {
             throw new RuntimeException("You have already applied for this internship");
         }
@@ -42,6 +44,22 @@ public class ApplicationService {
         // Check if application deadline has passed
         if (application.getInternship().getApplicationDeadline().isBefore(java.time.LocalDate.now())) {
             throw new RuntimeException("Application deadline has passed");
+        }
+
+        OkHttpClient client = new OkHttpClient();
+
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{}");
+        Request request = new Request.Builder()
+                .url("http://localhost:3000/new-application")
+                .post(body)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            System.out.println("Frontend call response: " + response.body().string());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return applicationRepository.save(application);
@@ -53,7 +71,7 @@ public class ApplicationService {
 
         application.setStatus(status);
         application.setReviewerNotes(reviewerNotes);
-        
+
         if (status == ApplicationStatus.ACCEPTED || status == ApplicationStatus.REJECTED) {
             application.setReviewedAt(LocalDateTime.now());
         }
@@ -69,8 +87,8 @@ public class ApplicationService {
             throw new RuntimeException("You can only withdraw your own applications");
         }
 
-        if (application.getStatus() != ApplicationStatus.PENDING && 
-            application.getStatus() != ApplicationStatus.UNDER_REVIEW) {
+        if (application.getStatus() != ApplicationStatus.PENDING &&
+                application.getStatus() != ApplicationStatus.UNDER_REVIEW) {
             throw new RuntimeException("Cannot withdraw application with current status");
         }
 
