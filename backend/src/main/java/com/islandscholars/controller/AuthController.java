@@ -9,16 +9,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.islandscholars.dto.MessageResponse;
-import com.islandscholars.dto.auth.JwtResponse;
 import com.islandscholars.dto.auth.LoginRequest;
 import com.islandscholars.dto.auth.SignupRequest;
+import com.islandscholars.security.services.UserDetailsImpl;
 import com.islandscholars.service.AuthService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*") // Adjust allowed origins if needed
+@CrossOrigin(origins = "*") // Adjust allowed origins as needed
 public class AuthController {
 
     private final AuthService authService;
@@ -30,11 +30,10 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
-            return ResponseEntity.ok(jwtResponse);
+            UserDetailsImpl userDetails = authService.authenticateUser(loginRequest);
+            return ResponseEntity.ok(userDetails);
         } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
+            return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
     }
@@ -45,9 +44,8 @@ public class AuthController {
             String message = authService.registerUser(signUpRequest);
             return ResponseEntity.ok(new MessageResponse(message));
         } catch (Exception e) {
-            e.printStackTrace(); // Consider using a proper logger
-            return ResponseEntity
-                    .badRequest()
+            e.printStackTrace(); // Replace with proper logging if possible
+            return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
     }

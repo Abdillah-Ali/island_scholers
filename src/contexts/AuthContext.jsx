@@ -2,9 +2,7 @@ import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -12,11 +10,10 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for saved user in localStorage on initial load
   useEffect(() => {
     const savedUser = localStorage.getItem('islandScholarsUser');
     const savedToken = localStorage.getItem('islandScholarsToken');
-    
+
     if (savedUser && savedToken) {
       try {
         setCurrentUser(JSON.parse(savedUser));
@@ -29,21 +26,22 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Test API connection
   const testConnection = async () => {
     try {
+      const token = localStorage.getItem('islandScholarsToken');
+
       const response = await fetch(`${API_BASE_URL}/auth/test`, {
-        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
-      
+
       if (!response.ok) {
         console.error('API connection test failed:', response.status);
         return false;
       }
-      
+
       const data = await response.json();
       console.log('API connection test successful:', data);
       return true;
@@ -53,26 +51,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login function
   const login = async (usernameOrEmail, password) => {
     try {
-      console.log('Attempting login with:', { usernameOrEmail });
-      
       const response = await fetch(`${API_BASE_URL}/auth/signin`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          usernameOrEmail,
-          password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernameOrEmail, password }),
       });
 
-      console.log('Login response status:', response.status);
-
       const data = await response.json();
-      console.log('Login response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
@@ -99,73 +86,58 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register function
   const register = async (userData) => {
     try {
-      console.log('Attempting registration with:', userData);
-      
-      // Test connection first
-      const connectionOk = await testConnection();
-      if (!connectionOk) {
+      const connected = await testConnection();
+      if (!connected) {
         throw new Error('Cannot connect to server. Please make sure the backend is running.');
       }
 
       const requestBody = {
-        username: userData.email.split('@')[0], // Use email prefix as username
+        username: userData.email.split('@')[0],
         email: userData.email,
         password: userData.password,
-        firstName: userData.firstName || userData.name?.split(' ')[0] || '',
-        lastName: userData.lastName || userData.name?.split(' ').slice(1).join(' ') || '',
-        role: userData.role.toUpperCase(),
-        phoneNumber: userData.phone || userData.contactPhone,
-        location: userData.location,
-        bio: userData.bio || userData.description,
-        
-        // Student specific fields
-        university: userData.university,
-        studentId: userData.studentId,
+        firstName: userData.firstName || (userData.name ? userData.name.split(' ')[0] : ''),
+        lastName: userData.lastName || (userData.name ? userData.name.split(' ').slice(1).join(' ') : ''),
+        role: userData.role?.toUpperCase() || 'USER',
+        phoneNumber: userData.phone || userData.contactPhone || '',
+        location: userData.location || '',
+        bio: userData.bio || userData.description || '',
+
+        university: userData.university || '',
+        studentId: userData.studentId || '',
         yearOfStudy: userData.yearOfStudy ? parseInt(userData.yearOfStudy) : null,
-        fieldOfStudy: userData.fieldOfStudy,
+        fieldOfStudy: userData.fieldOfStudy || '',
         skills: userData.skills || [],
-        
-        // Organization specific fields
-        companyName: userData.companyName,
-        industry: userData.industry,
-        companySize: userData.companySize,
-        description: userData.description,
-        website: userData.website,
+
+        companyName: userData.companyName || '',
+        industry: userData.industry || '',
+        companySize: userData.companySize || '',
+        description: userData.description || '',
+        website: userData.website || '',
         foundedYear: userData.foundedYear ? parseInt(userData.foundedYear) : null,
-        registrationNumber: userData.registrationNumber,
+        registrationNumber: userData.registrationNumber || '',
         desiredSkills: userData.desiredSkills || [],
-        
-        // University specific fields
-        universityName: userData.name,
+
+        universityName: userData.name || '',
         establishedYear: userData.establishedYear ? parseInt(userData.establishedYear) : null,
         studentCount: userData.studentCount ? parseInt(userData.studentCount) : null,
         facultyCount: userData.facultyCount ? parseInt(userData.facultyCount) : null,
         programs: userData.programs || [],
       };
 
-      console.log('Sending registration request:', requestBody);
-
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Registration response status:', response.status);
-
       const data = await response.json();
-      console.log('Registration response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
 
-      // After successful registration, log the user in
       return await login(userData.email, userData.password);
     } catch (error) {
       console.error('Registration error:', error);
@@ -173,24 +145,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('islandScholarsUser');
     localStorage.removeItem('islandScholarsToken');
   };
 
-  const value = {
-    currentUser,
-    login,
-    register,
-    logout,
-    testConnection,
-    isAuthenticated: !!currentUser
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        login,
+        register,
+        logout,
+        testConnection,
+        isAuthenticated: Boolean(currentUser),
+      }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

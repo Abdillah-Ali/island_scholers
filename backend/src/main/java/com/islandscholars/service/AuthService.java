@@ -1,12 +1,5 @@
 package com.islandscholars.service;
 
-import com.islandscholars.dto.auth.JwtResponse;
-import com.islandscholars.dto.auth.LoginRequest;
-import com.islandscholars.dto.auth.SignupRequest;
-import com.islandscholars.model.*;
-import com.islandscholars.repository.*;
-import com.islandscholars.security.jwt.JwtUtils;
-import com.islandscholars.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +8,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.islandscholars.dto.auth.LoginRequest;
+import com.islandscholars.dto.auth.SignupRequest;
+import com.islandscholars.model.Industry;
+import com.islandscholars.model.OrganizationProfile;
+import com.islandscholars.model.Role;
+import com.islandscholars.model.StudentProfile;
+import com.islandscholars.model.University;
+import com.islandscholars.model.User;
+import com.islandscholars.repository.OrganizationProfileRepository;
+import com.islandscholars.repository.StudentProfileRepository;
+import com.islandscholars.repository.UniversityRepository;
+import com.islandscholars.repository.UserRepository;
+import com.islandscholars.security.services.UserDetailsImpl;
 
 @Service
 public class AuthService {
@@ -37,16 +44,12 @@ public class AuthService {
     @Autowired
     PasswordEncoder encoder;
 
-    @Autowired
-    JwtUtils jwtUtils;
-
-    public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        // Try to find user by username or email
+    // Authenticate user by username/email and password, return user details only
+    public UserDetailsImpl authenticateUser(LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsernameOrEmail())
                 .orElse(userRepository.findByEmail(loginRequest.getUsernameOrEmail())
                         .orElseThrow(() -> new RuntimeException("User not found with username or email: " + loginRequest.getUsernameOrEmail())));
 
-        // Check if user is active
         if (!user.isActive()) {
             throw new RuntimeException("User account is deactivated");
         }
@@ -55,34 +58,24 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(user.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-        return new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getRole());
+        return (UserDetailsImpl) authentication.getPrincipal();
     }
 
     @Transactional
     public String registerUser(SignupRequest signUpRequest) {
-        // Validate required fields
         if (signUpRequest.getUsername() == null || signUpRequest.getUsername().trim().isEmpty()) {
             throw new RuntimeException("Username is required!");
         }
-        
+
         if (signUpRequest.getEmail() == null || signUpRequest.getEmail().trim().isEmpty()) {
             throw new RuntimeException("Email is required!");
         }
-        
+
         if (signUpRequest.getPassword() == null || signUpRequest.getPassword().trim().isEmpty()) {
             throw new RuntimeException("Password is required!");
         }
-        
+
         if (signUpRequest.getRole() == null) {
             throw new RuntimeException("Role is required!");
         }
@@ -95,7 +88,6 @@ public class AuthService {
             throw new RuntimeException("Error: Email is already in use!");
         }
 
-        // Create new user's account
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()),
@@ -109,7 +101,6 @@ public class AuthService {
 
         user = userRepository.save(user);
 
-        // Create role-specific profile
         switch (signUpRequest.getRole()) {
             case STUDENT:
                 createStudentProfile(user, signUpRequest);
@@ -133,7 +124,6 @@ public class AuthService {
         studentProfile.setFieldOfStudy(signUpRequest.getFieldOfStudy());
         studentProfile.setSkills(signUpRequest.getSkills());
 
-        // Find university by name and associate it
         if (signUpRequest.getUniversity() != null && !signUpRequest.getUniversity().trim().isEmpty()) {
             University university = universityRepository.findByName(signUpRequest.getUniversity())
                     .orElse(null);
@@ -147,7 +137,7 @@ public class AuthService {
         OrganizationProfile orgProfile = new OrganizationProfile();
         orgProfile.setUser(user);
         orgProfile.setCompanyName(signUpRequest.getCompanyName());
-        
+
         if (signUpRequest.getIndustry() != null && !signUpRequest.getIndustry().trim().isEmpty()) {
             try {
                 orgProfile.setIndustry(Industry.valueOf(signUpRequest.getIndustry().toUpperCase()));
@@ -155,7 +145,7 @@ public class AuthService {
                 orgProfile.setIndustry(Industry.OTHER);
             }
         }
-        
+
         orgProfile.setCompanySize(signUpRequest.getCompanySize());
         orgProfile.setDescription(signUpRequest.getDescription());
         orgProfile.setWebsite(signUpRequest.getWebsite());
@@ -182,12 +172,10 @@ public class AuthService {
 
     @Transactional
     public void createAdminUser() {
-        // Check if admin user already exists
         if (userRepository.findByUsername("Abdillah").isPresent()) {
-            return; // Admin already exists
+            return;
         }
 
-        // Create admin user
         User admin = new User();
         admin.setUsername("Abdillah");
         admin.setEmail("abdillah.va@gmail.com");

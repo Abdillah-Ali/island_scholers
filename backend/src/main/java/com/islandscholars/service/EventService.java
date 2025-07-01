@@ -1,15 +1,16 @@
 package com.islandscholars.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.islandscholars.model.Event;
 import com.islandscholars.model.EventStatus;
 import com.islandscholars.model.User;
 import com.islandscholars.repository.EventRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EventService {

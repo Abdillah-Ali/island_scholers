@@ -1,24 +1,32 @@
 package com.islandscholars.service;
 
-import com.islandscholars.model.Application;
-import com.islandscholars.model.ApplicationStatus;
-import com.islandscholars.model.Internship;
-import com.islandscholars.model.User;
-import com.islandscholars.repository.ApplicationRepository;
-import okhttp3.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.islandscholars.model.Application;
+import com.islandscholars.model.ApplicationStatus;
+import com.islandscholars.model.User;
+import com.islandscholars.repository.ApplicationRepository;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Service
 public class ApplicationService {
 
     @Autowired
     private ApplicationRepository applicationRepository;
+
+    private static final String FRONTEND_NOTIFICATION_URL = "http://localhost:3000/new-application";
 
     public List<Application> getApplicationsByStudent(User student) {
         return applicationRepository.findByStudent(student);
@@ -33,36 +41,45 @@ public class ApplicationService {
     }
 
     public Application createApplication(Application application) {
-        // Check if student already applied for this internship
-        Optional<Application> existingApplication = applicationRepository
+        // Check if the student already applied to this internship
+        Optional<Application> existing = applicationRepository
                 .findByStudentAndInternship(application.getStudent(), application.getInternship());
 
-        if (existingApplication.isPresent()) {
+        if (existing.isPresent()) {
             throw new RuntimeException("You have already applied for this internship");
         }
 
         // Check if application deadline has passed
-        if (application.getInternship().getApplicationDeadline().isBefore(java.time.LocalDate.now())) {
+        if (application.getInternship().getApplicationDeadline().isBefore(LocalDate.now())) {
             throw new RuntimeException("Application deadline has passed");
         }
 
+        // Notify frontend of new application
+        notifyFrontendOfNewApplication();
+
+        return applicationRepository.save(application);
+    }
+
+    private void notifyFrontendOfNewApplication() {
         OkHttpClient client = new OkHttpClient();
 
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, "{}");
+
         Request request = new Request.Builder()
-                .url("http://localhost:3000/new-application")
+                .url(FRONTEND_NOTIFICATION_URL)
                 .post(body)
                 .build();
 
-        try {
-            Response response = client.newCall(request).execute();
-            System.out.println("Frontend call response: " + response.body().string());
+        try (Response response = client.newCall(request).execute()) {
+            if (response.body() != null) {
+                System.out.println("Frontend notification response: " + response.body().string());
+            } else {
+                System.out.println("Frontend notification sent with empty response");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return applicationRepository.save(application);
     }
 
     public Application updateApplicationStatus(Long id, ApplicationStatus status, String reviewerNotes) {
